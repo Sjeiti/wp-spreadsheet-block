@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 module.exports = env => {
 
   const isProduction = !!env&&env.production
@@ -24,7 +25,14 @@ module.exports = env => {
       }
       ]
     }
-    ,plugins: []
+    ,plugins: [
+      new webpack.ProvidePlugin({
+          Buffer: ['buffer', 'Buffer']
+      })
+      ,new webpack.ProvidePlugin({
+         process: 'process/browser',
+      })
+    ]
     ,resolve: {
       fallback: {
         stream: require.resolve('stream-browserify')

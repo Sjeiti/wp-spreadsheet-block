@@ -1,7 +1,7 @@
 import fileReaderStream from 'filereader-stream'
 import csv from 'csv-parser'
 
-console.log('hello', 1234) // todo: remove log
+console.log('hello', 12334) // todo: remove log
 
 const fileEl = document.getElementById("file")
 
@@ -13,3 +13,4 @@ fileEl.addEventListener("change", event => {
     .pipe(csv())
     .on('data', data => console.log(data))
 })
+
