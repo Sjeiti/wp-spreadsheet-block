@@ -12,6 +12,13 @@ module.exports = env => {
       filename: 'index.js'
       ,path: path.resolve(__dirname,'httpdocs/wp-content/plugins/footprint/')
     }
+    ,devServer: {
+      static: {
+        directory: path.join(__dirname, 'src')
+      }
+      ,compress: true,
+      port: 9000
+    }
     ,devtool: 'source-map'
     ,module: {
       rules: [

@@ -7,17 +7,19 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "run-p css:watch webpack:watch",
+    "start": "run-p css:watch webpack:watch serve",
     "css": "sass src/scss/style.scss httpdocs/assets/css/style.css",
     "css:watch": "yarn css -w",
     "webpack": "npx webpack --config webpack.config.js",
-    "webpack:watch": "yarn webpack -w"
+    "webpack:watch": "yarn webpack -w",
+    "serve": "npx webpack serve"
   },
   "dependencies": {
     "buffer": "^6.0.3",
     "csv-parser": "^3.0.0",
     "filereader-stream": "^2.0.0",
-    "stream-browserify": "^3.0.0"
+    "stream-browserify": "^3.0.0",
+    "xlsx": "^0.17.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
@@ -35,6 +37,7 @@
     "process": "^0.11.10",
     "sass": "^1.43.2",
     "webpack": "^5.64.2",
-    "webpack-cli": "^4.9.1"
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.5.0"
   }
 }
