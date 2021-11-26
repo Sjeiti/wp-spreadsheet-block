@@ -1,4 +1,4 @@
-httpdocs/wp-content/*
+httpdocs/*
 !httpdocs/wp-content/plugins/footprint/*
 
 node_modules/
@@ -17,3 +17,5 @@ node_modules/
 
 temp
 supplies
+
+src/index.js
