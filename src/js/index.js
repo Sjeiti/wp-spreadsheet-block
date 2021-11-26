@@ -40,6 +40,9 @@ function onFileReaderLoad(e) {
     }))
     .join('')
   console.log('output.innerHTML',output.innerHTML) // todo: remove log
+
+  console.log('sheets',Object.values(workbook.Sheets)) // todo: remove log
+  console.log('formulae',Object.values(workbook.Sheets).map(XLSX.utils.sheet_to_formulae)) // todo: remove log
 }
 
 function getBase64(file) {
