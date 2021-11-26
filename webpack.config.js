@@ -1,16 +1,23 @@
 const path = require('path')
 const webpack = require('webpack')
+const CopyPlugin = require('copy-webpack-plugin')
+
 module.exports = env => {
 
   const isProduction = !!env&&env.production
   const mode = isProduction?'production':'development'
 
+  const targetFileName = 'index.js'
+  const targetDir = path.resolve(__dirname, 'httpdocs/wp-content/plugins/footprint/')
+  const targetFile = path.resolve(targetDir, targetFileName)
+  const testFile = path.resolve(__dirname, 'src', targetFileName)
+
   return {
     mode
     ,entry: './src/js/index.js'
     ,output: {
-      filename: 'index.js'
-      ,path: path.resolve(__dirname,'httpdocs/wp-content/plugins/footprint/')
+      filename: targetFileName
+      ,path: targetDir
     }
     ,devServer: {
       static: {
@@ -38,6 +45,12 @@ module.exports = env => {
       })
       ,new webpack.ProvidePlugin({
          process: 'process/browser',
+      })
+      ,new CopyPlugin({
+        patterns: [
+          { from: targetFile, to: testFile }
+          // { from: "other", to: "public" }
+        ],
       })
     ]
     ,resolve: {
