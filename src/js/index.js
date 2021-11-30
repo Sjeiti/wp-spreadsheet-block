@@ -8,7 +8,6 @@ overwriteLog()
 const inputFile = document.getElementById('file')
 inputFile.addEventListener('change', onInputFileChange)
 
-// console.log('inputFile.value',inputFile.value) // todo: remove log
 inputFile.value && inputFile.dispatchEvent(new Event('change'))
 
 const output = document.createElement('div')
@@ -16,7 +15,6 @@ document.body.appendChild(output)
 
 function onInputFileChange(event){
   const [file] = event.target.files
-  // console.log('change',file,event) // todo: remove log
   const reader = new FileReader()
   reader.addEventListener('load', onFileReaderLoad)
   reader.readAsBinaryString(file)
@@ -25,7 +23,6 @@ function onInputFileChange(event){
 }
 
 function onFileReaderLoad(e) {
-  // console.log('loadReader') // todo: remove log
   const data = e.target.result
   const workbook = XLSX.read(data, {type: 'binary', bookDeps: true})
   console.log('workbook',workbook) // todo: remove log
@@ -38,16 +35,11 @@ function onFileReaderLoad(e) {
     .join('')
 
   output.addEventListener('click', onClickOutput.bind(null, workbook))
-  // console.log('output.innerHTML',output.innerHTML) // todo: remove log
-
-  // console.log('sheets',Object.values(workbook.Sheets)) // todo: remove log
-  // console.log('formulae',Object.values(workbook.Sheets).map(XLSX.utils.sheet_to_formulae)) // todo: remove log
 }
 
 function getBase64(file) {
    const reader = new FileReader()
    reader.readAsDataURL(file)
-   // reader.addEventListener('load', console.log.bind(console, 'base64')) // todo: remove log
    reader.addEventListener('error', console.log.bind(console))
 }
 
@@ -75,16 +67,22 @@ function onClickOutput(workbook, e) {
     const sheet = workbook.Sheets[sheetName]
     const cell = sheet[cellName]
     const formulae = XLSX.utils.sheet_to_formulae(sheet)
-    // console.log('cell',{sheetName,cell,sheet,formulae}) // todo: remove log
+    console.log('click',{sheetName,cell,sheet,formulae}) // todo: remove log
     //
-    cell.v = cell.v + 1
-    wrapper.innerHTML = getHTML(workbook, sheetName)
+    const formula = formulae.filter(s=>new RegExp('^'+cellName).test(s))
+
+    //
+    // cell.v = cell.v + 1
+    // const formula = formulae.filter(s=>new RegExp('^'+cellName).test(s))
+    // const formulaIndex = formulae.indexOf(formula)
+    // formulae[formulaIndex] = cellName +' = '+ cell.v
+    // console.log('cell',cell.v,formulae[formulaIndex]) // todo: remove log
+    // wrapper.innerHTML = getHTML(workbook, sheetName)
   }
 }
 
 function getHTML(workbook, sheet){
-  console.log('sheetName',sheet) // todo: remove log
-	return XLSX.write(workbook, {
+  return XLSX.write(workbook, {
     sheet
     , type: 'string'
     , bookType: 'html'
