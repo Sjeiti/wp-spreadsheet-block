@@ -10,6 +10,7 @@
       font-family: Courier;
     }
     div { border: 1px solid green; }
+    table { border: 1px solid lime; }
     
     
     table {
@@ -22,11 +23,24 @@
       background: #DDD;
     }*/
     [data-t="s"] {
-        background: #EEE;
+      background: #EEE;
     }
     [data-t="n"] {
-        background: #EE8;
+      background: #EE8;
     }
+    
+    [data-t]:not(:empty) {
+      position: relative;
+    }
+    [data-t]:not(:empty):after {
+      content: attr(id);
+      position: absolute;
+      right: 0;
+      top: 0;
+      font-size: 0.75rem;
+      color: rgba(0,0,0,0.4);
+    }
+  
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
