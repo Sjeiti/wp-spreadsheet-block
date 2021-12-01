@@ -38,8 +38,8 @@ function onFileReaderLoad(e) {
             .map(([cellName, wbvalue])=>{
               const {t:type,n:number,v:value,f:fnc} = wbvalue
               const fullName = sheetName+'.'+cellName
-              const formula = fnc&&parseFormula(fnc)
-              return {type,number,value,fnc,sheetName,cellName,fullName,formula}
+              const formula = fnc&&parseFormula(fnc)||{formula:fnc}
+              return {type,number,value,sheetName,cellName,fullName,...formula}
             })
       })
       .reduce((acc, entries)=>{
@@ -72,6 +72,7 @@ function overwriteLog(){
     logOld(...args)
   }
   console.log('init')
+  window.onerror = console.log.bind(console)
 }
 
 
@@ -82,37 +83,19 @@ function onClickOutput(workbook, map, e) {
     const sheetName = wrapper.dataset.sheet
     const cellName = id.split(/\-/).pop()
     const fullName = sheetName+'.'+cellName
-    // const sheet = workbook.Sheets[sheetName]
-    // const cell = sheet[cellName]
-    // const formulae = XLSX.utils.sheet_to_formulae(sheet)
-    //
-    // const obj = formulae.map(parseFormula)
-    // const obj = formulae.reduce((acc, cellFormula)=>{
-    //   const cellObj = parseFormula(cellFormula)
-    //   acc[cellObj.cell] = cellObj
-    //   return acc
-    // },{})
     //
     console.log('click',fullName,map[fullName])//{sheetName,cell,sheet,formulae,obj}) // todo: remove log
-    //
-    // const formula = formulae.filter(s=>new RegExp('^'+cellName).test(s))
-    //
-    // cell.v = cell.v + 1
-    // const formula = formulae.filter(s=>new RegExp('^'+cellName).test(s))
-    // const formulaIndex = formulae.indexOf(formula)
-    // formulae[formulaIndex] = cellName +' = '+ cell.v
-    // console.log('cell',cell.v,formulae[formulaIndex]) // todo: remove log
-    // wrapper.innerHTML = getHTML(workbook, sheetName)
   }
 }
 
-function parseFormula(formulaValue){
-  console.log('formulaValue',formulaValue) // todo: remove log
-  const [, func, paramses] = formulaValue.match(/^([^(]+)\(([^)]*)\)$/)||[,,]
+function parseFormula(formula){
+  console.log('formulaValue',formula) // todo: remove log
+  const [, func, paramses] = formula.match(/^([A-Z^(]+)\(([^)]*)\)$/)||[,,]
   const params = paramses?.split(/,/g)
+  //console.log(func,paramses)
   const paramValues = params?.map(parseParam)
   //
-  return {formula:formulaValue,func,params,paramValues}
+  return {formula,func,params,paramValues}
 }
 
 // function parseFormula(cellFormula){
@@ -128,7 +111,7 @@ function parseFormula(formulaValue){
 // }
 
 function parseParam(paramValue){
-  const [,fromX,fromY,toX,toY] = paramValue.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/)
+  const [,fromX,fromY,toX,toY] = paramValue?.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/)
   const range = getRange(fromX,fromY,toX,toY)
   const number = parseNumber(paramValue)
   const isNumber = number!==undefined
