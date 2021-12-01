@@ -1,4 +1,5 @@
 import XLSX from 'xlsx'
+import HyperFormula from 'hyperformula'
 
 console.log('XLSX',XLSX,XLSX.utils) // todo: remove log
 
@@ -28,7 +29,7 @@ function onFileReaderLoad(e) {
   console.log('workbook',workbook) // todo: remove log
 
   // sjs-F11
-  // sjs-B29
+  // sjs-
 
   const map = Object.entries(workbook.Sheets)
       .map(([sheetName, sheet])=>{
@@ -52,12 +53,51 @@ function onFileReaderLoad(e) {
     .join('')
 
   output.addEventListener('click', onClickOutput.bind(null, workbook, map))
+
+  //////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////
+
+  console.log('cellToXY',cellToXY('AA1')) // todo: remove log
+
+  const hfSheets = Object.entries(workbook.Sheets, {})
+      .map(([sheetName, sheet])=>{
+        console.log('sheet',sheet) // todo: remove log
+        const colRows = []
+        Object.entries(sheet)
+            .filter(([key])=>key[0]!=='!')
+            .map(([cellName, cell])=>{
+              const {t:type,n:number,v:value,f:fnc} = cell
+              const [x, y] = cellToXY(cellName)
+              const formula = fnc&&'='+fnc||fnc
+              const row = colRows[y]||(colRows[y] = [])
+              row[x] = formula||value
+              return row
+            })
+        return [sheetName, colRows]
+      })
+      .reduce((acc, [sheetName, entries])=>((acc[sheetName] = entries), acc), {})
+
+  console.log('hfSheets', hfSheets) // todo: remove log
+  const hfInstance = HyperFormula.buildFromSheets(hfSheets, {licenseKey: 'gpl-v3'}) // MIT
+  console.log('hfInstance',hfInstance) // todo: remove log
+  console.log(' ',hfInstance.getCellValue({ col: 2, row: 5, sheet: 0 }))
+}
+
+function cellToXY(cellName) {
+  const [, stringX, stringY] = cellName.match(/^([^\d]+)(\d+)$/)
+  const x = stringToNumeral(stringX)
+  const y = parseInt(stringY, 10) - 1
+  return [x, y]
+}
+
+function stringToNumeral(string) {
+  return string.split('').reverse().reduce((acc,s,i)=>acc+s.charCodeAt(0)-65+i*26,0)
 }
 
 function getBase64(file) {
-   const reader = new FileReader()
-   reader.readAsDataURL(file)
-   reader.addEventListener('error', console.log.bind(console))
+  const reader = new FileReader()
+  reader.readAsDataURL(file)
+  reader.addEventListener('error', console.log.bind(console))
 }
 
 
@@ -85,6 +125,7 @@ function onClickOutput(workbook, map, e) {
     const fullName = sheetName+'.'+cellName
     //
     console.log('click',fullName,map[fullName])//{sheetName,cell,sheet,formulae,obj}) // todo: remove log
+    //
   }
 }
 
