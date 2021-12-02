@@ -55,10 +55,13 @@ function getHyperFormulaInstance(workbook) {
               row[x] = formula||value
               return row
             })
-        return [sheetName, colRows]
+        for (var i=0,l=colRows.length;i<l;i++) {
+        	if (!colRows[i]) colRows[i] = []
+        }
+        return [sheetName, colRows.map(a=>a||[])]
       })
       .reduce((acc, [sheetName, entries])=>((acc[sheetName] = entries), acc), {})
-
+  console.log('hfSheets',hfSheets) // todo: remove log
   const hfInstance = HyperFormula.buildFromSheets(hfSheets, {licenseKey: 'gpl-v3'}) // MIT
   return hfInstance
 }
