@@ -65,7 +65,7 @@ function getHyperFormulaInstance(workbook) {
 
 function cellToXY(cellName) {
   const [, stringX, stringY] = cellName.match(/^([^\d]+)(\d+)$/)
-  const x = stringToNumeral(stringX)
+  const x = stringToNumeral(stringX) - 1
   const y = parseInt(stringY, 10) - 1
   return [x, y]
 }
@@ -75,7 +75,7 @@ function xyToCell(x, y) {
 }
 
 function stringToNumeral(string) {
-  return string.split('').reverse().reduce((acc,s,i)=>acc+s.charCodeAt(0)-65+i*26,0)
+  return string.split('').reverse().reduce((acc,s,i)=>acc+(s.charCodeAt(0)-64)*(26**i), 0)
 }
 
 function numeralToString(numeral) {
@@ -87,7 +87,8 @@ function numeralToString(numeral) {
   }
   return s
 }
-[0,1,25,26,27,111,1E4].forEach(i=>console.log(`numeralToString(${i})`,numeralToString(i),stringToNumeral(numeralToString(i)))) // todo: remove log
+// [0,1, 25,26,27,28, 111, 259,260,261, 285,286,287, 1E4].forEach(i=>console.log(`numeralToString(${i})`,numeralToString(i),stringToNumeral(numeralToString(i)))) // todo: remove log
+// console.log(Array.from(new Array(8E2)).map((o,i)=>stringToNumeral(numeralToString(i))+':'+numeralToString(i)).join('\n')) // todo: remove log // todo: remove log
 
 function getBase64(file) {
   const reader = new FileReader()
