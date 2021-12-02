@@ -37,8 +37,8 @@ function onFileReaderLoad(e) {
     .map(sheet => `<div data-sheet="${sheet}">${getHTML(workbook, sheet)}</div>`)
     .join('')
 
-  output.addEventListener('click', onClickOutput.bind(null, workbook, hfInstance))
-  hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, workbook, output))
+  output.addEventListener('click', onClickOutput.bind(null, hfInstance))
+  hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, output))
 }
 
 function getHyperFormulaInstance(workbook) {
@@ -113,14 +113,14 @@ function overwriteLog(){
   window.onerror = console.log.bind(console)
 }
 
-function onClickOutput(workbook, hfInstance, e) {
+function onClickOutput(hfInstance, e) {
   const {target, target: {id, dataset: {t:type, v:value}}} = e
   if (type==='n') {
     const wrapper = target.closest('[data-sheet]')
     const sheetName = wrapper.dataset.sheet
     const cellName = id.split(/\-/).pop()
     //
-    const sheet = workbook.SheetNames.indexOf(sheetName)
+    const sheet = hfInstance.getSheetId(sheetName)
     //
     const [col, row] = cellToXY(cellName)
     const cellAddress = {col, row, sheet}
@@ -130,16 +130,16 @@ function onClickOutput(workbook, hfInstance, e) {
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
     //
     if (cellFormula===undefined&&canSetContents) {
-      hfInstance.setCellContents(cellAddress, cellValue+1)
+      hfInstance.setCellContents(cellAddress, cellValue + 1)
     }
   }
 }
 
-function onHyperFormulaValuesUpdated(workbook, parent, changed){
+function onHyperFormulaValuesUpdated(hfInstance, parent, changed){
   changed.forEach(change=>{
     const {address: {col, row, sheet}, newValue} = change
     const cellName = xyToCell(col+1, row+1)
-    const sheetName = workbook.SheetNames[sheet]
+    const sheetName = hfInstance.getSheetName(sheet)
     const cellElment = parent.querySelector(`[data-sheet="${sheetName}"] [id="sjs-${cellName}"]`)
     cellElment.textContent = newValue
   })
