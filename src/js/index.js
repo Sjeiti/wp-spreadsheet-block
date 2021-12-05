@@ -4,7 +4,7 @@ import HyperFormula from 'hyperformula'
 console.log('XLSX',XLSX,XLSX.utils) // todo: remove log
 
 // console.log('hello', 12334) // todo: remove log
-overwriteLog()
+location.hostname==='localhost'&&overwriteLog()
 
 const inputFile = document.getElementById('file')
 inputFile.addEventListener('change', onInputFileChange)

@@ -2,13 +2,15 @@ const path = require('path')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 
+const pluginPath = 'httpdocs/wp-content/plugins/spreadsheet-block/public/js'
+
 module.exports = env => {
 
   const isProduction = !!env&&env.production
   const mode = isProduction?'production':'development'
 
   const targetFileName = 'index.js'
-  const targetDir = path.resolve(__dirname, 'httpdocs/wp-content/plugins/footprint/')
+  const targetDir = path.resolve(__dirname, pluginPath)
   const targetFile = path.resolve(targetDir, targetFileName)
   const testFile = path.resolve(__dirname, 'src', targetFileName)
 

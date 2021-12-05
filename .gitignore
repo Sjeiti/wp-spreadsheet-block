@@ -1,5 +1,9 @@
 httpdocs/*
-!httpdocs/wp-content/plugins/footprint/*
+!httpdocs/wp-content/
+httpdocs/wp-content/*
+!httpdocs/wp-content/plugins/
+httpdocs/wp-content/plugins/*
+!httpdocs/wp-content/plugins/spreadsheet-block/
 
 node_modules/
 
@@ -19,3 +23,5 @@ temp
 supplies
 
 src/index.js
+src/index.js.LICENSE.txt
+
