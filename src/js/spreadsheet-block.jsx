@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react'
 import { registerBlockType } from '@wordpress/blocks'
 import {
   useBlockProps,
@@ -5,10 +6,11 @@ import {
   MediaUpload,
   MediaUploadCheck
 } from '@wordpress/block-editor'
-import { PanelBody, Button } from '@wordpress/components'
+import { PanelBody, Button, TextControl } from '@wordpress/components'
 import { Fragment } from '@wordpress/element'
+import { __ } from '@wordpress/i18n'
 
-const __ = s=>s
+// const __ = s=>s
 const ssb = 'ssb'
 // const ALLOWED_MEDIA_TYPES = [ '.xlsx', '.xls', '.csv' ]
 // const ALLOWED_MEDIA_TYPES = [ 'xlsx', 'xls', 'csv' ]
@@ -27,20 +29,53 @@ registerBlockType( 'spreadsheet/block', {
     icon: 'spreadsheet',
     category: 'design',
     example: {},
+
+    attributes: {
+      mediaUrl: {
+        type: 'string',
+        default: ''
+      },
+      linkLabel: {
+        type: 'string',
+        default: ''
+      }
+    },
+
+    foo() {
+      return 23
+    },
+
     edit(props) {
+      const {setAttributes, attributes: {mediaUrl, linkLabel}} = props
       const blockProps = useBlockProps( { style: blockStyle } );
       blockProps.className += ' components-placeholder is-large'
 
       console.log('props',props) // todo: remove log
-      // console.log('blockProps',blockProps) //  todo: remove log
+      console.log('blockProps',blockProps) //  todo: remove log
+      // console.log('this.foo',this.foo()) //  todo: remove log
+      console.log('this.foo',this) //  todo: remove log
 
       const onSelectMedia = (media) => {
         console.log('onSelectMedia',media) // todo: remove log
-        props.setAttributes({
+        setAttributes({
           mediaId: media.id,
           mediaUrl: media.url
-        });
+        })
       }
+
+      const onChangeLinkLabel = ( newLinkLabel ) => {
+        console.log('onChangeLinkLabel',newLinkLabel) // todo: remove log
+        setAttributes( { linkLabel: newLinkLabel === undefined ? '' : newLinkLabel } )
+      }
+
+      useEffect(()=>{
+        console.log('mediaUrl',mediaUrl) // todo: remove log
+      }, [mediaUrl])
+
+      // useEffect(()=>{
+      //   console.log('poepjes') // todo: remove log
+      //   setAttributes({poep:23})
+      // }, [])
 
       return (<Fragment>
             <InspectorControls>
@@ -59,18 +94,34 @@ registerBlockType( 'spreadsheet/block', {
                   />
                 </MediaUploadCheck>
               </PanelBody>
+              <PanelBody>
+                <div>
+                  <fieldset>
+                    <TextControl
+                      label={__( 'Link label', 'my-affiliate-block' )}
+                      value={ linkLabel }
+                      onChange={ onChangeLinkLabel }
+                      help={ __( 'Add link label', 'my-affiliate-block' )}
+                    />
+                  </fieldset>
+                </div>
+              </PanelBody>
             </InspectorControls>
             <div {...blockProps}>
+              <p>{mediaUrl}</p>
+              <p>{linkLabel}</p>
               <div className="components-placeholder__label">Spreadsheet</div>
             </div>
           </Fragment>)
     },
     save(props) {
-        const blockProps = useBlockProps.save( { style: blockStyle } );
-        console.log('save.props',props) // todo: remove log
+        const {attributes: {mediaUrl, linkLabel}} = props
+        const blockProps = useBlockProps.save( { style: blockStyle } )
+        console.log('save',{props,blockProps}) // todo: remove log
         return (
             <div { ...blockProps }>
-              {props.attributes.mediaUrl}
+              <p>{mediaUrl}</p>
+              <p>{linkLabel}</p>
               Hello World (from the frontend).
             </div>
         )
