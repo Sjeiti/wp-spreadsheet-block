@@ -15,12 +15,19 @@ const ssb = 'ssb'
 // const ALLOWED_MEDIA_TYPES = [ '.xlsx', '.xls', '.csv' ]
 // const ALLOWED_MEDIA_TYPES = [ 'xlsx', 'xls', 'csv' ]
 // const ALLOWED_MEDIA_TYPES = [ 'documents' ]
-const ALLOWED_MEDIA_TYPES = [ ]
+const ALLOWED_MEDIA_TYPES = []
 
 const blockStyle = {
     backgroundColor: 'white',
     padding: '20px',
     boxShadow: '0 0 0 1px solid inset'
+}
+
+function view(attr, admin) {
+  const {spreadsheetURI} = attr
+  return <div
+      data-spreadsheet-block="{JSON.stringify(attr)}"
+    ></div>
 }
 
 registerBlockType( 'spreadsheet/block', {
@@ -31,7 +38,7 @@ registerBlockType( 'spreadsheet/block', {
     example: {},
 
     attributes: {
-      mediaUrl: {
+      spreadsheetURI: {
         type: 'string',
         default: ''
       },
@@ -41,12 +48,9 @@ registerBlockType( 'spreadsheet/block', {
       }
     },
 
-    foo() {
-      return 23
-    },
-
     edit(props) {
-      const {setAttributes, attributes: {mediaUrl, linkLabel}} = props
+      const {setAttributes, attributes, attributes: {spreadsheetURI, linkLabel}} = props
+
       const blockProps = useBlockProps( { style: blockStyle } );
       blockProps.className += ' components-placeholder is-large'
 
@@ -59,7 +63,7 @@ registerBlockType( 'spreadsheet/block', {
         console.log('onSelectMedia',media) // todo: remove log
         setAttributes({
           mediaId: media.id,
-          mediaUrl: media.url
+          spreadsheetURI: media.url
         })
       }
 
@@ -69,8 +73,8 @@ registerBlockType( 'spreadsheet/block', {
       }
 
       useEffect(()=>{
-        console.log('mediaUrl',mediaUrl) // todo: remove log
-      }, [mediaUrl])
+        console.log('spreadsheetURI',spreadsheetURI) // todo: remove log
+      }, [spreadsheetURI])
 
       // useEffect(()=>{
       //   console.log('poepjes') // todo: remove log
@@ -98,32 +102,22 @@ registerBlockType( 'spreadsheet/block', {
                 <div>
                   <fieldset>
                     <TextControl
-                      label={__( 'Link label', 'my-affiliate-block' )}
+                      label={__( 'Link label', ssb )}
                       value={ linkLabel }
                       onChange={ onChangeLinkLabel }
-                      help={ __( 'Add link label', 'my-affiliate-block' )}
+                      help={ __( 'Add link label', ssb )}
                     />
                   </fieldset>
                 </div>
               </PanelBody>
             </InspectorControls>
-            <div {...blockProps}>
-              <p>{mediaUrl}</p>
-              <p>{linkLabel}</p>
-              <div className="components-placeholder__label">Spreadsheet</div>
-            </div>
+            {view(attributes, true) 
           </Fragment>)
     },
     save(props) {
-        const {attributes: {mediaUrl, linkLabel}} = props
+        const {attributes, attributes: {spreadsheetURI, linkLabel}} = props
         const blockProps = useBlockProps.save( { style: blockStyle } )
         console.log('save',{props,blockProps}) // todo: remove log
-        return (
-            <div { ...blockProps }>
-              <p>{mediaUrl}</p>
-              <p>{linkLabel}</p>
-              Hello World (from the frontend).
-            </div>
-        )
+        return view(attributes)
     }
 } )
