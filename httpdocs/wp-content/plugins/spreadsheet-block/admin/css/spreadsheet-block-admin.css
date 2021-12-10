@@ -1,0 +1,16 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+
+.spreadsheet-wrapper {
+	padding: 1rem;
+	background-color: white;
+	box-shadow: 0 0 0 1px black inset;
+}
+
+[data-spreadsheet-block] {
+}
+[data-spreadsheet-block]:before {
+	content: attr(data-spreadsheet-block);
+}

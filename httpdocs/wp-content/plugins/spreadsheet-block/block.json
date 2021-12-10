@@ -4,12 +4,13 @@
     "title": "Spreadsheet",
     "category": "widgets",
     "icon": "spreadsheet",
-    "description": "Example block written with ESNext standard and JSX support – build step required.",
+    "description": "A spreadsheet block.",
     "supports": {
         "html": false
     },
-    "textdomain": "gutenpride",
-    "editorScript": "file:./public/js/spreadsheet-block.jsx.js",
+    "textdomain": "ssb",
+    "editorScript": "file:./public/block/index.js",
     "editorStyle": "file:./public/spreadsheet-block-public.css",
-    "style": "file:./admin/css/spreadsheet-block-admin.css"
+    "style": "file:./admin/css/spreadsheet-block-admin.css",
+    "script": "file:./public/index.js"
 }

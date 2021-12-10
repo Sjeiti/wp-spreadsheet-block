@@ -6,11 +6,11 @@ import {
   MediaUpload,
   MediaUploadCheck
 } from '@wordpress/block-editor'
-import { PanelBody, Button, TextControl } from '@wordpress/components'
+import { PanelBody,   Button, TextControl } from '@wordpress/components'
 import { Fragment } from '@wordpress/element'
 import { __ } from '@wordpress/i18n'
 
-// const __ = s=>s
+// const __ = ss=>ss
 const ssb = 'ssb'
 // const ALLOWED_MEDIA_TYPES = [ '.xlsx', '.xls', '.csv' ]
 // const ALLOWED_MEDIA_TYPES = [ 'xlsx', 'xls', 'csv' ]
@@ -26,7 +26,7 @@ const blockStyle = {
 function view(attr, admin) {
   const {spreadsheetURI} = attr
   return <div
-      data-spreadsheet-block="{JSON.stringify(attr)}"
+      data-spreadsheet-block={JSON.stringify(attr)}
     ></div>
 }
 
@@ -45,6 +45,10 @@ registerBlockType( 'spreadsheet/block', {
       linkLabel: {
         type: 'string',
         default: ''
+      },
+      foo: {
+        type: 'string',
+        default: ''
       }
     },
 
@@ -52,7 +56,7 @@ registerBlockType( 'spreadsheet/block', {
       const {setAttributes, attributes, attributes: {spreadsheetURI, linkLabel}} = props
 
       const blockProps = useBlockProps( { style: blockStyle } );
-      blockProps.className += ' components-placeholder is-large'
+      blockProps.className += ' components-placeholder is-large  spreadsheet-wrapper'
 
       console.log('props',props) // todo: remove log
       console.log('blockProps',blockProps) //  todo: remove log
@@ -111,7 +115,7 @@ registerBlockType( 'spreadsheet/block', {
                 </div>
               </PanelBody>
             </InspectorControls>
-            {view(attributes, true) 
+            <div {...blockProps}>asdf{view(attributes, true)}</div>
           </Fragment>)
     },
     save(props) {

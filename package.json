@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "wp-scripts build src/js/spreadsheet-block.jsx --output-path=httpdocs/wp-content/plugins/spreadsheet-block/public/js",
+    "build": "wp-scripts build src/block/index.jsx --output-path=httpdocs/wp-content/plugins/spreadsheet-block/public/block --output-filename=index.js",
     "build:watch": "yarn build --watch",
     "start": "run-p css:watch webpack:watch serve",
     "css": "sass src/scss/style.scss httpdocs/assets/css/style.css",
