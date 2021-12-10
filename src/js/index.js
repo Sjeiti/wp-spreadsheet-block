@@ -1,44 +1,67 @@
 import XLSX from 'xlsx'
 import HyperFormula from 'hyperformula'
+import {overwriteLog} from './utils/overwriteLog'
+import {nextFrame} from './utils'
 
-console.log('XLSX',XLSX,XLSX.utils) // todo: remove log
+nextFrame(init, 3)
 
-// console.log('hello', 12334) // todo: remove log
-location.hostname==='localhost'&&overwriteLog()
-
-const inputFile = document.getElementById('file')
-inputFile.addEventListener('change', onInputFileChange)
-
-inputFile.value && inputFile.dispatchEvent(new Event('change'))
-
-const output = document.createElement('div')
-document.body.appendChild(output)
+function init(){
+  const element = document.querySelector('[data-spreadsheet-block]')
+  if (element) {
+    const data = element.dataset.spreadsheetBlock
+    const {spreadsheetURI} = JSON.parse(data)
+    fetch(spreadsheetURI)
+      .then(response => response.ok?response.arrayBuffer():(()=>{throw new Error(response.status)})())
+      .then(loadedResultToSpreadsheetTable.bind(null, element))
+      .catch(console.error.bind(console))
+  } else {
+    location.hostname==='localhost'&&overwriteLog()
+    const inputFile = document.getElementById('file')
+    inputFile.addEventListener('change', onInputFileChange)
+    inputFile.value && inputFile.dispatchEvent(new Event('change'))
+  }
+}
 
 function onInputFileChange(event){
   const [file] = event.target.files
   const reader = new FileReader()
   reader.addEventListener('load', onFileReaderLoad)
   reader.readAsBinaryString(file)
-  //
   getBase64(file)
 }
 
 function onFileReaderLoad(e) {
   const data = e.target.result
-  const workbook = XLSX.read(data, {type: 'binary', bookDeps: true})
-  const hfInstance = getHyperFormulaInstance(workbook)
 
-  console.log('workbook', workbook) // todo: remove log
-  console.log('hfInstance', hfInstance) // todo: remove log
-
-  // sjs-F11
-
-  output.innerHTML = workbook.SheetNames
-    .map(sheet => `<div data-sheet="${sheet}">${getHTML(workbook, sheet)}</div>`)
-    .join('')
+  const output = document.createElement('div')
+  output.dataset.spreadsheetBlock = 'test'
+  document.body.appendChild(output)
+  const hfInstance = loadedResultToSpreadsheetTable(output, data)
 
   output.addEventListener('click', onClickOutput.bind(null, hfInstance))
   hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, output))
+}
+
+function loadedResultToSpreadsheetTable(target, buffer) {
+  const workbook = XLSX.read(buffer, {type: 'binary', bookDeps: true})
+  const hfInstance = getHyperFormulaInstance(workbook)
+  console.log('workbook', workbook) // todo: remove log
+  console.log('hfInstance', hfInstance) // todo: remove log
+/*  const tabMenu = workbook.SheetNames
+      .map(sheet=>`<label for="${getSheetID(sheet)}">${sheet}</label>`)
+      .join('')*/
+  const sheets = workbook.SheetNames
+    .map((sheet, i) => `
+      <input type="radio" name="foo" id="${getSheetID(sheet)}" ${i===0&&'checked'||''} class="visually-hidden" />
+      <label for="${getSheetID(sheet)}">${sheet}</label>
+      <div data-sheet="${sheet}">${getHTML(workbook, sheet)}</div>`)
+    .join('')
+  target.innerHTML = sheets
+  return hfInstance
+}
+
+function getSheetID(name) {
+  return 'sheet-'+name
 }
 
 function getHyperFormulaInstance(workbook) {
@@ -97,20 +120,6 @@ function getBase64(file) {
   const reader = new FileReader()
   reader.readAsDataURL(file)
   reader.addEventListener('error', console.log.bind(console))
-}
-
-function overwriteLog(){
-  const {console} = window
-  const logOld = console.log.bind(console)
-  const pre = document.createElement('pre')
-  pre.textContent = 'log'
-  document.body.appendChild(pre)
-  console.log = (...args) => {
-    pre.textContent += '\n'+args.join(' ')
-    logOld(...args)
-  }
-  console.log('init')
-  window.onerror = console.log.bind(console)
 }
 
 function onClickOutput(hfInstance, e) {

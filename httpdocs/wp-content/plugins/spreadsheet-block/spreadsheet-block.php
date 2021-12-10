@@ -39,7 +39,7 @@ add_action( 'init', 'ssb_init' );
 
 // block.json script and viewScript do not seem to work
 function ssb_enqueue_scripts() {
-    wp_enqueue_script( 'dds-js', plugins_url( '/public/index.js', __FILE__ ));
+    wp_enqueue_script( 'dds-js', plugins_url( '/public/js/index.js', __FILE__ ));
 }
 add_action('wp_enqueue_scripts','ssb_enqueue_scripts');
 

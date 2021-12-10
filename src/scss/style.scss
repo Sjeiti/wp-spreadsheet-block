@@ -1,0 +1,40 @@
+
+[data-spreadsheet-block] {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+  &:before {
+    content: attr(data-spreadsheet-block);
+    color: red;
+    display: block;
+    font-size: 12px;
+    order: -2;
+    flex: 0 0 100%;
+  }
+  input.visually-hidden {
+    &+label {
+      order: -1;
+      cursor: pointer;
+    }
+    &:checked+label { text-decoration: underline; }
+    &~[data-sheet] {
+      flex: 0 0 100%;
+      display: none;
+    }
+    &:checked+label+[data-sheet] {
+      display: block;
+    }
+  }
+  //td:empty { display: none; }
+}
+
+.visually-hidden {
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+}

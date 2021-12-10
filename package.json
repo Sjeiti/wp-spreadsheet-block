@@ -10,12 +10,12 @@
     "build": "wp-scripts build src/block/index.jsx --output-path=httpdocs/wp-content/plugins/spreadsheet-block/public/block --output-filename=index.js",
     "build:watch": "yarn build --watch",
     "start": "run-p css:watch webpack:watch serve",
-    "css": "sass src/scss/style.scss httpdocs/assets/css/style.css",
+    "css": "sass src/scss/style.scss src/css/style.css",
     "css:watch": "yarn css -w",
     "webpack": "npx webpack --config _webpack.config.js",
     "webpack:watch": "yarn webpack -w",
     "webpack:prod": "yarn webpack --mode production",
-    "serve": "npx webpack serve"
+    "serve": "npx webpack serve --config _webpack.config.js"
   },
   "dependencies": {
     "@wordpress/block-editor": "^8.0.7",

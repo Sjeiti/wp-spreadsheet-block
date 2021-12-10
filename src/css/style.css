@@ -1,0 +1,40 @@
+[data-spreadsheet-block] {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+[data-spreadsheet-block]:before {
+  content: attr(data-spreadsheet-block);
+  color: red;
+  display: block;
+  font-size: 12px;
+  order: -2;
+  flex: 0 0 100%;
+}
+[data-spreadsheet-block] input.visually-hidden + label {
+  order: -1;
+  cursor: pointer;
+}
+[data-spreadsheet-block] input.visually-hidden:checked + label {
+  text-decoration: underline;
+}
+[data-spreadsheet-block] input.visually-hidden ~ [data-sheet] {
+  flex: 0 0 100%;
+  display: none;
+}
+[data-spreadsheet-block] input.visually-hidden:checked + label + [data-sheet] {
+  display: block;
+}
+
+.visually-hidden {
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+}
+
+/*# sourceMappingURL=style.css.map */

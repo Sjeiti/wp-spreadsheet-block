@@ -12,5 +12,5 @@
     "editorScript": "file:./public/block/index.js",
     "editorStyle": "file:./public/spreadsheet-block-public.css",
     "style": "file:./admin/css/spreadsheet-block-admin.css",
-    "script": "file:./public/index.js"
+    "script": "file:./public/js/index.js?why-u-no-working?"
 }
