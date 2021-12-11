@@ -2,12 +2,16 @@ import XLSX from 'xlsx'
 import HyperFormula from 'hyperformula'
 import {overwriteLog} from './utils/overwriteLog'
 import {nextFrame} from './utils'
+import '../scss/style.scss'
 
 nextFrame(init, 3)
 
 function init(){
   const element = document.querySelector('[data-spreadsheet-block]')
-  if (element) {
+  const isTest = element.matches('[data-test]')
+  const elements = document.querySelectorAll('[data-spreadsheet-block]')
+  console.log('num',elements.length) // todo multiple
+  if (!isTest) {
     const data = element.dataset.spreadsheetBlock
     const {spreadsheetURI} = JSON.parse(data)
     fetch(spreadsheetURI)
@@ -33,9 +37,10 @@ function onInputFileChange(event){
 function onFileReaderLoad(e) {
   const data = e.target.result
 
-  const output = document.createElement('div')
+  const output = document.querySelector('[data-spreadsheet-block]')
+/*  const output = document.createElement('div')
   output.dataset.spreadsheetBlock = 'test'
-  document.body.appendChild(output)
+  document.body.appendChild(output)*/
   const hfInstance = loadedResultToSpreadsheetTable(output, data)
 
   output.addEventListener('click', onClickOutput.bind(null, hfInstance))

@@ -31,14 +31,18 @@ module.exports = env => {
     ,devtool: 'source-map'
     ,module: {
       rules: [
-      {
-        test: /\.js$/
-        ,exclude: /node_modules/
-        ,use: {
-          loader: 'babel-loader'
-          ,options: { babelrc: true }
+        {
+          test: /\.js$/
+          ,exclude: /node_modules/
+          ,use: {
+            loader: 'babel-loader'
+            ,options: { babelrc: true }
+          }
         }
-      }
+        ,{
+          test: /\.scss$/
+          ,use: ["style-loader", "css-loader", "sass-loader"]
+        }
       ]
     }
     ,plugins: [
