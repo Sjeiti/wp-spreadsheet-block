@@ -38,9 +38,6 @@ function onFileReaderLoad(e) {
   const data = e.target.result
 
   const output = document.querySelector('[data-spreadsheet-block]')
-/*  const output = document.createElement('div')
-  output.dataset.spreadsheetBlock = 'test'
-  document.body.appendChild(output)*/
   const hfInstance = loadedResultToSpreadsheetTable(output, data)
 
   output.addEventListener('click', onClickOutput.bind(null, hfInstance))
@@ -52,13 +49,13 @@ function loadedResultToSpreadsheetTable(target, buffer) {
   const hfInstance = getHyperFormulaInstance(workbook)
   console.log('workbook', workbook) // todo: remove log
   console.log('hfInstance', hfInstance) // todo: remove log
-/*  const tabMenu = workbook.SheetNames
-      .map(sheet=>`<label for="${getSheetID(sheet)}">${sheet}</label>`)
-      .join('')*/
-  const sheets = workbook.SheetNames
+  const {SheetNames:sheetNames} = workbook
+  const sheets = sheetNames
     .map((sheet, i) => `
-      <input type="radio" name="foo" id="${getSheetID(sheet)}" ${i===0&&'checked'||''} class="visually-hidden" />
-      <label for="${getSheetID(sheet)}">${sheet}</label>
+      ${sheetNames.length>1?`
+        <input type="radio" name="foo" id="${getSheetID(sheet)}" ${i===0&&'checked'||''} class="visually-hidden" />
+        <label for="${getSheetID(sheet)}">${sheet}</label>
+      `:''}
       <div data-sheet="${sheet}">${getHTML(workbook, sheet)}</div>`)
     .join('')
   target.innerHTML = sheets
