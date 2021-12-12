@@ -107,10 +107,11 @@ function getSpreadsheetFragment(spreadSheetData) {
     const table = createElement('table',fragment)
     table.dataset.sheet = name
     const tbody = createElement('tbody',table)
+    const maxLength = Math.max(...rows.map(row=>row.length))
     for (let i=0,l=rows.length;i<l;i++) {
     	const row = rows[i]
       const tr = createElement('tr',tbody)
-      for (let j=0,n=row.length;j<n;j++) {
+      for (let j=0;j<maxLength;j++) {
         const cell = row[j]
         const {x, y, type, formula, value} = cell||{}
         const td = createElement('td',tr,cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{}):{})
