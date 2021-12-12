@@ -90,7 +90,7 @@ function getSpreadsheetFragment(spreadSheetData) {
   const fragment = document.createDocumentFragment()
   const numSheets = spreadSheetData.length
   const spreadSheetName = 'spreadsheet'+Date.now()+(Math.random()*1E9<<0)
-  spreadSheetData.forEach(([name,rows],i)=>{
+  spreadSheetData.forEach(([name,rows],sheetIndex)=>{
     if (numSheets>1) {
       const id = getSheetID(name)
       createElement('input',fragment,{
@@ -98,7 +98,7 @@ function getSpreadsheetFragment(spreadSheetData) {
         ,name: spreadSheetName
         ,id
         ,className: 'visually-hidden'
-        ,...(i===0?{checked:true}:{})
+        ,...(sheetIndex===0?{checked:true}:{})
       })
       createElement('label',fragment,{
         for: id
@@ -107,20 +107,16 @@ function getSpreadsheetFragment(spreadSheetData) {
     const table = createElement('table',fragment)
     table.dataset.sheet = name
     const tbody = createElement('tbody',table)
-    rows.forEach(row=>{
+    for (let i=0,l=rows.length;i<l;i++) {
+    	const row = rows[i]
       const tr = createElement('tr',tbody)
-      row.forEach(({x, y, type, formula, value, format})=>{
-        const td = createElement('td',tr,{
-          'data-x': x
-          ,'data-y': y
-          ,'data-type': type
-          ,...(formula?{'data-formula': formula}:{})
-        })
-        td.appendChild(createTextNode(value))
-        // !format&&td.appendChild(createTextNode(value))
-        // format&&createElement({t:'strong'}[format]||format,td).appendChild(createTextNode(value))
-      })
-    })
+      for (let j=0,n=row.length;j<n;j++) {
+        const cell = row[j]
+        const {x, y, type, formula, value} = cell||{}
+        const td = createElement('td',tr,cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{}):{})
+        value&&td.appendChild(createTextNode(value))
+      }
+    }
   })
   return fragment
 }

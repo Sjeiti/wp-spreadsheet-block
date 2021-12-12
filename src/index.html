@@ -10,35 +10,16 @@
       font-family: Courier;
     }
     div { border: 1px solid green; }
-    table { border: 1px solid lime; }
-    
     
     table {
       font-family: 'Roboto', sans-serif;
+      border: 1px solid lime;
     }
-    
-    /*td:nth-child(2),
-    td:nth-child(5),
-    td:nth-child(7) {
-      background: #DDD;
-    }*/
-    [data-t="s"] {
+    [data-type="s"] {
       background: #EEE;
     }
-    [data-t="n"] {
+    [data-type="n"] {
       background: #EE8;
-    }
-    
-    [data-t]:not(:empty) {
-      position: relative;
-    }
-    [data-t]:not(:empty):after {
-      content: attr(id);
-      position: absolute;
-      right: 0;
-      top: 0;
-      font-size: 0.75rem;
-      color: rgba(0,0,0,0.4);
     }
   
   </style>
