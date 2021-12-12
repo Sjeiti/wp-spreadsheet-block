@@ -21,3 +21,12 @@ export function nextFrame(fn, num=1){
   }
   requestAnimationFrame(down)
 }
+
+export function createElement(name,parent,attr){
+  const element = document.createElement(name)
+  attr&&Object.entries(attr).forEach(([name,value])=>{
+    element.setAttribute(name==='className'?'class':name,value)
+  })
+  parent?.appendChild(element)
+  return element
+}
