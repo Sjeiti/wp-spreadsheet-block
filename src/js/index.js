@@ -46,10 +46,12 @@ function onFileReaderLoad(e) {
 
 function loadedResultToSpreadsheetTable(target, buffer) {
   const workbook = XLSX.read(buffer, {type: 'binary', bookDeps: true})
+  const {SheetNames:sheetNames} = workbook
   const hfInstance = getHyperFormulaInstance(workbook)
   console.log('workbook', workbook) // todo: remove log
   console.log('hfInstance', hfInstance) // todo: remove log
-  const {SheetNames:sheetNames} = workbook
+  console.log('html', getHTML(workbook, sheetNames[0])) // todo: remove log
+  const spreadsheetFragment = getSpreadsheetFragment(workbook)
   const sheets = sheetNames
     .map((sheet, i) => `
       ${sheetNames.length>1?`
@@ -66,8 +68,8 @@ function getSheetID(name) {
   return 'sheet-'+name
 }
 
-function getHyperFormulaInstance(workbook) {
-  const hfSheets = Object.entries(workbook.Sheets, {})
+function getSpreadsheetData(workbook) { 
+  return Object.entries(workbook.Sheets, {}) 
       .map(([sheetName, sheet])=>{
         const colRows = []
         Object.entries(sheet)
@@ -77,7 +79,7 @@ function getHyperFormulaInstance(workbook) {
               const [x, y] = cellToXY(cellName)
               const formula = fnc&&'='+fnc||fnc
               const row = colRows[y]||(colRows[y] = [])
-              row[x] = formula||value
+              row[x] = {x, y, type, formula, value}
               return row
             })
         for (var i=0,l=colRows.length;i<l;i++) {
@@ -85,8 +87,54 @@ function getHyperFormulaInstance(workbook) {
         }
         return [sheetName, colRows.map(a=>a||[])]
       })
-      .reduce((acc, [sheetName, entries])=>((acc[sheetName] = entries), acc), {})
-  console.log('hfSheets',hfSheets) // todo: remove log
+}
+
+function getSpreadsheetFragment(workbook) {
+  //const createElement = document.createElement.bind(document)
+  const elm = (name,parent,attr)=>{
+    const element = document.createElement(name)
+    Object.entries(([name,value])=>{
+      element.seAttribute(name==='className'?'class':name,value)
+    })
+    parent?.appendChild(element)
+    return element
+  }
+  const fragment = document.createDocumentFragment()
+  const datalist = getSpreadsheetData(workbook)
+  console.log('datalist',JSON.stringify(datalist)) // todo: remove log
+  datalist.forEach(([name,rows],i)=>{
+    if (i>1) {
+      const id = getSheetID(sheet)
+      elm('input',fragment,{
+        type: 'radio'
+        ,name: 'foo'
+        ,id
+        ,className: 'visually-hidden'
+        ,...(i===0?{checked:true}:{})
+      })
+      elm('label',fragment,{
+        for: id
+      }).appendChild(document.createTextElement(sheet))
+    }
+    const table = elm('table',fragment)
+    const tbody = elm('tbody',table)
+    rows.forEach(row=>{
+      const tr = elm('tr',tbody)
+      rows.forEach(cell=>{
+        elm('td',tr,{
+          //todo
+        })
+      })
+    })
+  })
+  return fragment
+}
+
+function getHyperFormulaInstance(workbook) {
+  const hfSheets = getSpreadsheetData(workbook).reduce((acc,[name,cols])=>{
+    acc[name] = cols.map(rows=>rows.map(({formula,value})=>formula||value))
+    return acc
+  },{})
   const hfInstance = HyperFormula.buildFromSheets(hfSheets, {licenseKey: 'gpl-v3'}) // MIT
   return hfInstance
 }
