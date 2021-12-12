@@ -20,7 +20,7 @@ function init(){
       .then(loadedResultToSpreadsheetTable.bind(null, element))
       .catch(console.error.bind(console))
   } else {
-    location.hostname==='localhost'&&overwriteLog()
+    // location.hostname==='localhost'&&overwriteLog()
     const inputFile = document.getElementById('file')
     inputFile.addEventListener('change', onInputFileChange)
     inputFile.value && inputFile.dispatchEvent(new Event('change'))
@@ -61,12 +61,13 @@ function getSpreadsheetData(workbook) {
         Object.entries(sheet)
             .filter(([key])=>key[0]!=='!')
             .map(([cellName, cell])=>{
-              const {t:type,v:value,f:fnc,r:formatted} = cell // t,v,r,h,f,w
+              const {t:type,v:value,f:fnc/*,r:formatted*/} = cell // t,v,r,h,f,w
               const [x, y] = cellToXY(cellName)
               const formula = fnc&&'='+fnc||fnc
               const row = colRows[y]||(colRows[y] = [])
-              const [,format] = formatted?.match(/<([^>]+)/)||[]
-              row[x] = {x, y, type, formula, value, format}
+              //console.log('formatted',formatted,cell) // todo: remove log
+              // const [,format] = formatted?.match(/<([^>]+)/)||[]
+              row[x] = {x, y, type, formula, value/*, format*/}
               return row
             })
         for (var i=0,l=colRows.length;i<l;i++) {
@@ -115,8 +116,9 @@ function getSpreadsheetFragment(spreadSheetData) {
           ,'data-type': type
           ,...(formula?{'data-formula': formula}:{})
         })
-        !format&&td.appendChild(createTextNode(value))
-        format&&createElement({t:'strong'}[format]||format,td).appendChild(createTextNode(value))
+        td.appendChild(createTextNode(value))
+        // !format&&td.appendChild(createTextNode(value))
+        // format&&createElement({t:'strong'}[format]||format,td).appendChild(createTextNode(value))
       })
     })
   })
