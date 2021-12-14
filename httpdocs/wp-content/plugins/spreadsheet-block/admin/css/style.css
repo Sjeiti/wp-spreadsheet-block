@@ -37,4 +37,19 @@
   position: absolute;
 }
 
+.spreadsheet-wrapper {
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 0 0 1px black inset;
+}
+
+[data-spreadsheet-block]:before {
+  content: attr(data-spreadsheet-block);
+  color: gray;
+  display: block;
+  font-size: 10px;
+  order: -2;
+  flex: 0 0 100%;
+}
+
 /*# sourceMappingURL=style.css.map */

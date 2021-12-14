@@ -2,15 +2,12 @@
     "apiVersion": 2,
     "name": "create-block/spreadsheet",
     "title": "Spreadsheet",
-    "category": "widgets",
-    "icon": "spreadsheet",
+    "category": "media",
+    "icon": "dashicons-media-spreadsheet",
     "description": "A spreadsheet block.",
-    "supports": {
-        "html": false
-    },
+    "supports": { "html": false },
     "textdomain": "ssb",
     "editorScript": "file:./public/block/index.js",
-    "editorStyle": "file:./public/spreadsheet-block-public.css",
-    "style": "file:./admin/css/spreadsheet-block-admin.css",
+    "style": "file:./admin/css/style.css",
     "script": "file:./public/js/index.js?why-u-no-working?"
 }

@@ -43,6 +43,11 @@ function ssb_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts','ssb_enqueue_scripts');
 
+//function ssb_admin_enqueue_scripts() {
+//    wp_enqueue_style( 'ssb_style', plugin_dir_url( __FILE__ ) . '/admin/css/style.css', false, '1.0.0' );
+//}
+//add_action( 'admin_enqueue_scripts', 'ssb_admin_enqueue_scripts' );
+
 function ssb_upload_mimes( $mimes ) {
 		return array_merge($mimes, array (
 			'xls' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

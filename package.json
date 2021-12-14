@@ -13,7 +13,9 @@
     "webpack": "npx webpack --config _webpack.config.js",
     "webpack:watch": "yarn webpack -w",
     "webpack:prod": "yarn webpack --mode production",
-    "serve": "npx webpack serve --config _webpack.config.js"
+    "serve": "npx webpack serve --config _webpack.config.js",
+    "css": "sass src/scss/admin.scss httpdocs/wp-content/plugins/spreadsheet-block/admin/css/style.css",
+    "css:watch": "yarn css -w"
   },
   "dependencies": {
     "@wordpress/block-editor": "^8.0.7",
