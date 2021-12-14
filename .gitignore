@@ -25,3 +25,6 @@ supplies
 src/index.js
 src/index.js.LICENSE.txt
 
+*.map
+
+

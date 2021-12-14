@@ -43,3 +43,11 @@ function ssb_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts','ssb_enqueue_scripts');
 
+function ssb_upload_mimes( $mimes ) {
+		return array_merge($mimes, array (
+			'xls' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'csv' => 'text/csv'
+		));
+}
+add_filter( 'upload_mimes', 'ssb_upload_mimes' );

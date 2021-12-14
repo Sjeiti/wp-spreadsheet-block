@@ -10,6 +10,8 @@ import { PanelBody,   Button, TextControl } from '@wordpress/components'
 import { Fragment } from '@wordpress/element'
 import { __ } from '@wordpress/i18n'
 
+import {init} from '../js/index'
+
 // const __ = ss=>ss
 const ssb = 'ssb'
 // const ALLOWED_MEDIA_TYPES = [ '.xlsx', '.xls', '.csv' ]
@@ -77,7 +79,8 @@ registerBlockType( 'spreadsheet/block', {
       }
 
       useEffect(()=>{
-        console.log('spreadsheetURI',spreadsheetURI) // todo: remove log
+        console.log('spreadsheetURI',spreadsheetURI) // todo: remove lo
+        init()
       }, [spreadsheetURI])
 
       // useEffect(()=>{

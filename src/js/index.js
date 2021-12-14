@@ -2,28 +2,32 @@ import XLSX from 'xlsx'
 import HyperFormula from 'hyperformula'
 import {overwriteLog} from './utils/overwriteLog'
 import {nextFrame, createElement} from './utils'
-import '../scss/style.scss'
+import foo from '../scss/style.scss'
 import {cellToXY} from './utils/spreadsheet'
+
+console.log('spreadsheetblock',foo) // todo: remove log
 
 nextFrame(init, 3)
 
-function init(){
+export function init(){
   const element = document.querySelector('[data-spreadsheet-block]')
-  const isTest = element.matches('[data-test]')
-  const elements = document.querySelectorAll('[data-spreadsheet-block]')
-  console.log('num',elements.length) // todo multiple
-  if (!isTest) {
-    const data = element.dataset.spreadsheetBlock
-    const {spreadsheetURI} = JSON.parse(data)
-    fetch(spreadsheetURI)
-      .then(response => response.ok?response.arrayBuffer():(()=>{throw new Error(response.status)})())
-      .then(loadedResultToSpreadsheetTable.bind(null, element))
-      .catch(console.error.bind(console))
-  } else {
-    // location.hostname==='localhost'&&overwriteLog()
-    const inputFile = document.getElementById('file')
-    inputFile.addEventListener('change', onInputFileChange)
-    inputFile.value && inputFile.dispatchEvent(new Event('change'))
+  if (element) {
+    const isTest = element.matches('[data-test]')
+    const elements = document.querySelectorAll('[data-spreadsheet-block]')
+    console.log('num',elements.length) // todo multiple
+    if (!isTest) {
+      const data = element.dataset.spreadsheetBlock
+      const {spreadsheetURI} = JSON.parse(data)
+      fetch(spreadsheetURI)
+        .then(response => response.ok?response.arrayBuffer():(()=>{throw new Error(response.status)})())
+        .then(loadedResultToSpreadsheetTable.bind(null, element))
+        .catch(console.error.bind(console))
+    } else {
+      // location.hostname==='localhost'&&overwriteLog()
+      const inputFile = document.getElementById('file')
+      inputFile.addEventListener('change', onInputFileChange)
+      inputFile.value && inputFile.dispatchEvent(new Event('change'))
+    }
   }
 }
 
