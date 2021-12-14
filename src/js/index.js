@@ -2,10 +2,10 @@ import XLSX from 'xlsx'
 import HyperFormula from 'hyperformula'
 import {overwriteLog} from './utils/overwriteLog'
 import {nextFrame, createElement} from './utils'
-import foo from '../scss/style.scss'
+import '../scss/style.scss'
 import {cellToXY} from './utils/spreadsheet'
 
-console.log('spreadsheetblock',foo) // todo: remove log
+console.log('spreadsheetblock',23) // todo: remove log
 
 nextFrame(init, 3)
 
@@ -51,6 +51,7 @@ function onFileReaderLoad(e) {
 
 function loadedResultToSpreadsheetTable(target, buffer) {
   const workbook = XLSX.read(buffer, {type: 'binary', bookDeps: true})
+  console.log('workbook',workbook) // todo: remove log
   const spreadSheetData = getSpreadsheetData(workbook)
   const hfInstance = getHyperFormulaInstance(spreadSheetData)
   while (target.children.length) target.removeChild(target.children[0])
@@ -65,13 +66,15 @@ function getSpreadsheetData(workbook) {
         Object.entries(sheet)
             .filter(([key])=>key[0]!=='!')
             .map(([cellName, cell])=>{
-              const {t:type,v:value,f:fnc/*,r:formatted*/} = cell // t,v,r,h,f,w
+              const {t:type,v:value,f:fnc/*,r:formatted*/,c:comments} = cell // t,v,r,h,f,w
               const [x, y] = cellToXY(cellName)
               const formula = fnc&&'='+fnc||fnc
               const row = colRows[y]||(colRows[y] = [])
+              const comment = comments?.[0]?.t
+              console.log('comment',comment) // todo: remove log
               //console.log('formatted',formatted,cell) // todo: remove log
               // const [,format] = formatted?.match(/<([^>]+)/)||[]
-              row[x] = {x, y, type, formula, value/*, format*/}
+              row[x] = {x, y, type, formula, value/*, format*/, comment}
               return row
             })
         for (var i=0,l=colRows.length;i<l;i++) {
@@ -140,6 +143,11 @@ function onClickOutput(hfInstance, e) {
     const cellValue = hfInstance.getCellValue(cellAddress)
     const cellFormula = hfInstance.getCellFormula(cellAddress)
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
+    //
+    console.log('poepjes') // todo: remove log
+    document.documentElement.dispatchEvent(new CustomEvent('what', {detail: {
+        col, row, cellValue
+      }}))
     //
     if (cellFormula===undefined&&canSetContents) {
       hfInstance.setCellContents(cellAddress, cellValue + 1)

@@ -25,10 +25,11 @@ const blockStyle = {
     boxShadow: '0 0 0 1px solid inset'
 }
 
+console.log('zucht',23) // todo: remove log
+
 function view(attr, admin) {
-  const {spreadsheetURI} = attr
   return <div
-      data-spreadsheet-block={JSON.stringify(attr)}
+      data-spreadsheet-block={JSON.stringify({...attr, ...(admin&&{admin}||{})})}
     ></div>
 }
 
@@ -87,6 +88,9 @@ registerBlockType( 'spreadsheet/block', {
       //   console.log('poepjes') // todo: remove log
       //   setAttributes({poep:23})
       // }, [])
+      useEffect(()=>{
+        document.documentElement.addEventListener('what',console.log.bind(console,'eeeh'))
+      }, [])
 
       return (<Fragment>
             <InspectorControls>
@@ -118,7 +122,10 @@ registerBlockType( 'spreadsheet/block', {
                 </div>
               </PanelBody>
             </InspectorControls>
-            <div {...blockProps}>asdf{view(attributes, true)}</div>
+            <div {...blockProps} onClick={console.log.bind(console, 'admin click')}>
+              {/*<button onClick={console.log.bind(console, 'button click')}>hallo</button>*/}
+              {view(attributes, true)}
+            </div>
           </Fragment>)
     },
     save(props) {

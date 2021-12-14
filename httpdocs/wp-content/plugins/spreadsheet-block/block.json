@@ -3,7 +3,7 @@
     "name": "create-block/spreadsheet",
     "title": "Spreadsheet",
     "category": "media",
-    "icon": "dashicons-media-spreadsheet",
+    "icon": "editor-table",
     "description": "A spreadsheet block.",
     "supports": { "html": false },
     "textdomain": "ssb",
