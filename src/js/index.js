@@ -91,6 +91,19 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
   const fragment = document.createDocumentFragment()
   const numSheets = spreadSheetData.length
   const spreadSheetName = 'spreadsheet'+Date.now()+(Math.random()*1E9<<0)
+  //
+  if (admin){
+    const div = createElement('div',fragment,{className:'nav'})
+    ;['editable','head'].forEach(name=>{
+      const label = createElement('label',div,{})
+      label.appendChild(createTextNode(name))
+      createElement('input',label,{
+        type: 'checkbox'
+        ,name: spreadSheetName+name
+      })
+    })
+  }
+  //
   spreadSheetData.forEach(([name,rows],sheetIndex)=>{
     if (numSheets>1) {
       const id = getSheetID(spreadSheetName+name)
@@ -120,7 +133,9 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
       for (let j=0;j<maxLength;j++) {
         const cell = row[j]
         const {x, y, type, formula, value} = cell||{}
-        const td = createElement('td',tr,cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{}):{})
+        const className = `x-${x} y-${y}`
+        const params = cell?Object.entries({x,y,type,className}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{}):{className}
+        const td = createElement('td',tr,params)
         value&&td.appendChild(createTextNode(value))
       }
     }
