@@ -90,6 +90,7 @@ registerBlockType( 'spreadsheet/block', {
       // }, [])
       useEffect(()=>{
         document.documentElement.addEventListener('what',console.log.bind(console,'eeeh'))
+        console.log('blockProps',blockProps) // todo: remove log
       }, [])
 
       return (<Fragment>

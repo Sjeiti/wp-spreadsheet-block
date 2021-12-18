@@ -10,17 +10,14 @@ console.log('spreadsheetblock',23) // todo: remove log
 nextFrame(init, 3)
 
 export function init(){
-  const element = document.querySelector('[data-spreadsheet-block]')
-  if (element) {
+  Array.from(document.querySelectorAll('[data-spreadsheet-block]')).forEach(element=>{
     const isTest = element.matches('[data-test]')
-    const elements = document.querySelectorAll('[data-spreadsheet-block]')
-    console.log('num',elements.length) // todo multiple
     if (!isTest) {
       const data = element.dataset.spreadsheetBlock
-      const {spreadsheetURI} = JSON.parse(data)
+      const {spreadsheetURI, admin} = JSON.parse(data)
       fetch(spreadsheetURI)
         .then(response => response.ok?response.arrayBuffer():(()=>{throw new Error(response.status)})())
-        .then(loadedResultToSpreadsheetTable.bind(null, element))
+        .then(buffer=>loadedResultToSpreadsheetTable(element, buffer, admin))
         .catch(console.error.bind(console))
     } else {
       // location.hostname==='localhost'&&overwriteLog()
@@ -28,7 +25,7 @@ export function init(){
       inputFile.addEventListener('change', onInputFileChange)
       inputFile.value && inputFile.dispatchEvent(new Event('change'))
     }
-  }
+  })
 }
 
 function onInputFileChange(event){
@@ -49,13 +46,13 @@ function onFileReaderLoad(e) {
   hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, output))
 }
 
-function loadedResultToSpreadsheetTable(target, buffer) {
+function loadedResultToSpreadsheetTable(target, buffer, admin) {
   const workbook = XLSX.read(buffer, {type: 'binary', bookDeps: true})
   console.log('workbook',workbook) // todo: remove log
   const spreadSheetData = getSpreadsheetData(workbook)
   const hfInstance = getHyperFormulaInstance(spreadSheetData)
   while (target.children.length) target.removeChild(target.children[0])
-  target.appendChild(getSpreadsheetFragment(spreadSheetData))
+  target.appendChild(getSpreadsheetFragment(spreadSheetData, admin))
   return hfInstance
 }
 
@@ -71,9 +68,6 @@ function getSpreadsheetData(workbook) {
               const formula = fnc&&'='+fnc||fnc
               const row = colRows[y]||(colRows[y] = [])
               const comment = comments?.[0]?.t
-              console.log('comment',comment) // todo: remove log
-              //console.log('formatted',formatted,cell) // todo: remove log
-              // const [,format] = formatted?.match(/<([^>]+)/)||[]
               row[x] = {x, y, type, formula, value/*, format*/, comment}
               return row
             })
@@ -92,14 +86,14 @@ function getHyperFormulaInstance(spreadSheetData) {
   return HyperFormula.buildFromSheets(hfSheets, {licenseKey: 'gpl-v3'})
 }
 
-function getSpreadsheetFragment(spreadSheetData) {
+function getSpreadsheetFragment(spreadSheetData, admin) {
   const createTextNode = document.createTextNode.bind(document)
   const fragment = document.createDocumentFragment()
   const numSheets = spreadSheetData.length
   const spreadSheetName = 'spreadsheet'+Date.now()+(Math.random()*1E9<<0)
   spreadSheetData.forEach(([name,rows],sheetIndex)=>{
     if (numSheets>1) {
-      const id = getSheetID(name)
+      const id = getSheetID(spreadSheetName+name)
       createElement('input',fragment,{
         type: 'radio'
         ,name: spreadSheetName
@@ -107,8 +101,13 @@ function getSpreadsheetFragment(spreadSheetData) {
         ,className: 'visually-hidden'
         ,...(sheetIndex===0?{checked:true}:{})
       })
-      createElement('label',fragment,{
+      const label = createElement('label',fragment,{
         for: id
+      })
+      label.appendChild(createTextNode(name))
+      admin&&createElement('input',label,{
+        type: 'checkbox'
+        ,name: 'hide_'+spreadSheetName
       }).appendChild(createTextNode(name))
     }
     const table = createElement('table',fragment)
