@@ -42,17 +42,23 @@ function onFileReaderLoad(e) {
   const output = document.querySelector('[data-spreadsheet-block]')
   const hfInstance = loadedResultToSpreadsheetTable(output, data)
 
-  output.addEventListener('click', onClickOutput.bind(null, hfInstance))
-  hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, output))
+  // output.addEventListener('click', onClickOutput.bind(null, hfInstance))
+  // hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, output))
 }
 
 function loadedResultToSpreadsheetTable(target, buffer, admin) {
   const workbook = XLSX.read(buffer, {type: 'binary', bookDeps: true})
   console.log('workbook',workbook) // todo: remove log
   const spreadSheetData = getSpreadsheetData(workbook)
+  console.log('spreadSheetData',spreadSheetData) // todo: remove log
   const hfInstance = getHyperFormulaInstance(spreadSheetData)
   while (target.children.length) target.removeChild(target.children[0])
   target.appendChild(getSpreadsheetFragment(spreadSheetData, admin))
+  //
+  target.addEventListener('click', onClickOutput.bind(null, hfInstance))
+  target.addEventListener('change', onChangeOutput.bind(null, hfInstance))
+  hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, target))
+  //
   return hfInstance
 }
 
@@ -65,7 +71,7 @@ function getSpreadsheetData(workbook) {
             .map(([cellName, cell])=>{
               const {t:type,v:value,f:fnc/*,r:formatted*/,c:comments} = cell // t,v,r,h,f,w
               const [x, y] = cellToXY(cellName)
-              const formula = fnc&&'='+fnc||fnc
+              const formula = fnc&&'='+fnc||fnc // weird high numbrs for some xls function values
               const row = colRows[y]||(colRows[y] = [])
               const comment = comments?.[0]?.t
               row[x] = {x, y, type, formula, value/*, format*/, comment}
@@ -90,7 +96,7 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
   const createTextNode = document.createTextNode.bind(document)
   const fragment = document.createDocumentFragment()
   const numSheets = spreadSheetData.length
-  const spreadSheetName = 'spreadsheet'+Date.now()+(Math.random()*1E9<<0)
+  const spreadSheetName = getSpreadsheetName()
   //
   if (admin){
     const div = createElement('div',fragment,{className:'nav'})
@@ -99,28 +105,26 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
       label.appendChild(createTextNode(name))
       createElement('input',label,{
         type: 'checkbox'
-        ,name: spreadSheetName+name
+        ,name: getInputName(spreadSheetName,name)
       })
     })
   }
   //
   spreadSheetData.forEach(([name,rows],sheetIndex)=>{
     if (numSheets>1) {
-      const id = getSheetID(spreadSheetName+name)
+      const id = getInputName(spreadSheetName,'tab',name)
       createElement('input',fragment,{
         type: 'radio'
-        ,name: spreadSheetName
+        ,name: getInputName(spreadSheetName,'tab')
         ,id
         ,className: 'visually-hidden'
         ,...(sheetIndex===0?{checked:true}:{})
       })
-      const label = createElement('label',fragment,{
-        for: id
-      })
+      const label = createElement('label',fragment,{ for: id })
       label.appendChild(createTextNode(name))
       admin&&createElement('input',label,{
         type: 'checkbox'
-        ,name: 'hide_'+spreadSheetName
+        ,name: getInputName(spreadSheetName,'hide',name)
       }).appendChild(createTextNode(name))
     }
     const table = createElement('table',fragment)
@@ -133,8 +137,8 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
       for (let j=0;j<maxLength;j++) {
         const cell = row[j]
         const {x, y, type, formula, value} = cell||{}
-        const className = `x-${x} y-${y}`
-        const params = cell?Object.entries({x,y,type,className}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{}):{className}
+        const className = `x${x} y${y}`
+        const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className}):{className}
         const td = createElement('td',tr,params)
         value&&td.appendChild(createTextNode(value))
       }
@@ -143,9 +147,22 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
   return fragment
 }
 
+function onChangeOutput(hfInstance, e) {
+  const {target: {name}} = e
+  const [spreadsheet, command, param] = name.split(/_/g)
+  if (['hide','editable','head'].includes(command)) {
+    console.log('onChangeOutput', spreadsheet, command, param) // todo: remove log
+    //
+    document.documentElement.dispatchEvent(new CustomEvent('what', {detail: {
+        spreadsheet, command, param
+      }}))
+  }
+}
+
 function onClickOutput(hfInstance, e) {
   const {target, target: {dataset: {x, y, type}}} = e
-  if (type==='n') {
+  if (x&&y&&type==='n') {
+    console.log('onClickOutput', x, y, type) // todo: remove log
     const wrapper = target.closest('[data-sheet]')
     const sheetName = wrapper.dataset.sheet
     const sheet = hfInstance.getSheetId(sheetName)
@@ -158,7 +175,6 @@ function onClickOutput(hfInstance, e) {
     const cellFormula = hfInstance.getCellFormula(cellAddress)
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
     //
-    console.log('poepjes') // todo: remove log
     document.documentElement.dispatchEvent(new CustomEvent('what', {detail: {
         col, row, cellValue
       }}))
@@ -178,8 +194,14 @@ function onHyperFormulaValuesUpdated(hfInstance, parent, changed){
   })
 }
 
-function getSheetID(name) {
-  return 'sheet-'+name
+function getInputName(sheet,...names) {
+  return sheet+'_'+names.join('_')
+}
+
+let spreadsheetIndex = 0
+function getSpreadsheetName() {
+  return 'spreadsheet'+(spreadsheetIndex++)
+  // return 'spreadsheet'+Date.now()+(Math.random()*1E9<<0)
 }
 
 function getBase64(file) {
