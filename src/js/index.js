@@ -13,11 +13,12 @@ export function init(){
   Array.from(document.querySelectorAll('[data-spreadsheet-block]')).forEach(element=>{
     const isTest = element.matches('[data-test]')
     if (!isTest) {
-      const data = element.dataset.spreadsheetBlock
-      const {spreadsheetURI, admin} = JSON.parse(data)
+      const data = JSON.parse(element.dataset.spreadsheetBlock)
+      const {spreadsheetURI, hide, admin} = data
+      console.log('init',{spreadsheetURI, hide, admin}) // todo: remove log
       fetch(spreadsheetURI)
         .then(response => response.ok?response.arrayBuffer():(()=>{throw new Error(response.status)})())
-        .then(buffer=>loadedResultToSpreadsheetTable(element, buffer, admin))
+        .then(buffer=>loadedResultToSpreadsheetTable(element, buffer, data))
         .catch(console.error.bind(console))
     } else {
       // location.hostname==='localhost'&&overwriteLog()
@@ -46,14 +47,14 @@ function onFileReaderLoad(e) {
   // hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, output))
 }
 
-function loadedResultToSpreadsheetTable(target, buffer, admin) {
+function loadedResultToSpreadsheetTable(target, buffer, data) {
   const workbook = XLSX.read(buffer, {type: 'binary', bookDeps: true})
   console.log('workbook',workbook) // todo: remove log
   const spreadSheetData = getSpreadsheetData(workbook)
   console.log('spreadSheetData',spreadSheetData) // todo: remove log
   const hfInstance = getHyperFormulaInstance(spreadSheetData)
   while (target.children.length) target.removeChild(target.children[0])
-  target.appendChild(getSpreadsheetFragment(spreadSheetData, admin))
+  target.appendChild(getSpreadsheetFragment(spreadSheetData, data))
   //
   target.addEventListener('click', onClickOutput.bind(null, hfInstance))
   target.addEventListener('change', onChangeOutput.bind(null, hfInstance))
@@ -92,10 +93,10 @@ function getHyperFormulaInstance(spreadSheetData) {
   return HyperFormula.buildFromSheets(hfSheets, {licenseKey: 'gpl-v3'})
 }
 
-function getSpreadsheetFragment(spreadSheetData, admin) {
+function getSpreadsheetFragment(spreadSheetData, data) {
+  const {admin, hide} = data
   const createTextNode = document.createTextNode.bind(document)
   const fragment = document.createDocumentFragment()
-  const numSheets = spreadSheetData.length
   const spreadSheetName = getSpreadsheetName()
   //
   if (admin){
@@ -110,8 +111,12 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
     })
   }
   //
-  spreadSheetData.forEach(([name,rows],sheetIndex)=>{
-    if (numSheets>1) {
+  const spreadSheetDataVisible = admin&&spreadSheetData||spreadSheetData.filter(([name])=>!hide.includes(name))
+  const numSheets = spreadSheetDataVisible.length
+  //
+  spreadSheetDataVisible.forEach(([name,rows],sheetIndex)=>{
+    const isSheetHidden = hide.includes(name)
+    if (numSheets>1) { // add tabs for multiple sheets
       const id = getInputName(spreadSheetName,'tab',name)
       createElement('input',fragment,{
         type: 'radio'
@@ -125,14 +130,15 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
       admin&&createElement('input',label,{
         type: 'checkbox'
         ,name: getInputName(spreadSheetName,'hide',name)
-      }).appendChild(createTextNode(name))
+        ,...(isSheetHidden?{checked:true}:{})
+      })
     }
     const table = createElement('table',fragment)
     table.dataset.sheet = name
     const tbody = createElement('tbody',table)
     const maxLength = Math.max(...rows.map(row=>row.length))
     for (let i=0,l=rows.length;i<l;i++) {
-    	const row = rows[i]
+      const row = rows[i]
       const tr = createElement('tr',tbody)
       for (let j=0;j<maxLength;j++) {
         const cell = row[j]
@@ -148,13 +154,13 @@ function getSpreadsheetFragment(spreadSheetData, admin) {
 }
 
 function onChangeOutput(hfInstance, e) {
-  const {target: {name}} = e
+  const {target: {name, checked}} = e
   const [spreadsheet, command, param] = name.split(/_/g)
   if (['hide','editable','head'].includes(command)) {
-    console.log('onChangeOutput', spreadsheet, command, param) // todo: remove log
+    console.log('onChangeOutput', spreadsheet, command, param, checked) // todo: remove log
     //
     document.documentElement.dispatchEvent(new CustomEvent('what', {detail: {
-        spreadsheet, command, param
+        spreadsheet, command, param, checked
       }}))
   }
 }

@@ -45,26 +45,38 @@ registerBlockType( 'spreadsheet/block', {
         type: 'string',
         default: ''
       },
-      linkLabel: {
-        type: 'string',
-        default: ''
-      },
-      foo: {
-        type: 'string',
-        default: ''
+      hide: {
+        type: 'array',
+        default: []
       }
+      // data: {
+      //   type: 'object',
+      //   default: {
+      //     hide: [],
+      //     editable: {},
+      //     head: {}
+      //   }
+      // },
+      // linkLabel: {
+      //   type: 'string',
+      //   default: ''
+      // },
+      // foo: {
+      //   type: 'string',
+      //   default: ''
+      // }
     },
 
     edit(props) {
-      const {setAttributes, attributes, attributes: {spreadsheetURI, linkLabel}} = props
+      const {setAttributes, attributes, attributes: {spreadsheetURI, hide}} = props
 
       const blockProps = useBlockProps( { style: blockStyle } );
       blockProps.className += ' components-placeholder is-large  spreadsheet-wrapper'
 
-      console.log('props',props) // todo: remove log
-      console.log('blockProps',blockProps) //  todo: remove log
+      // console.log('props',props) // todo: remove log
+      // console.log('blockProps',blockProps) //  todo: remove log
       // console.log('this.foo',this.foo()) //  todo: remove log
-      console.log('this.foo',this) //  todo: remove log
+      // console.log('this.foo',this) //  todo: remove log
 
       const onSelectMedia = (media) => {
         console.log('onSelectMedia',media) // todo: remove log
@@ -74,24 +86,46 @@ registerBlockType( 'spreadsheet/block', {
         })
       }
 
-      const onChangeLinkLabel = ( newLinkLabel ) => {
-        console.log('onChangeLinkLabel',newLinkLabel) // todo: remove log
-        setAttributes( { linkLabel: newLinkLabel === undefined ? '' : newLinkLabel } )
+      // const onChangeLinkLabel = ( newLinkLabel ) => {
+      //   console.log('onChangeLinkLabel',newLinkLabel) // todo: remove log
+      //   setAttributes( { linkLabel: newLinkLabel === undefined ? '' : newLinkLabel } )
+      // }
+
+      const onClickAdmin = (e) => {
+        console.log('onClickAdmin', e) // todo: remove log
+        // const {target, currentTarget} = e.nativeEvent
+        // const checkboxes = Array.from(target.querySelector('[type=checkbox]'))
+        // checkboxes.forEach(input=>{
+        //   const {name, checked} = input
+        //   const [spreadsheet, command, value] = name.split(/_/g)
+        //   console.log('name', name, checked, command, value) // todo: remove log
+        // })
+        // setAttributes( { foo: Math.random().toString() } )
+      }
+
+      const onExternalEvent = (e)=>{
+        const {command, param, spreadsheet, checked} = e.detail
+        console.log('onExternalEvent', {checked, command, param, spreadsheet}) // todo: remove log
+        if (command==='hide') {
+          const copy = hide.slice(0)
+          const newHide = checked&&[...copy, param]||copy.filter(s=>s!==param) // todo might append
+          setAttributes( { hide: newHide } )
+        }
       }
 
       useEffect(()=>{
-        console.log('spreadsheetURI',spreadsheetURI) // todo: remove lo
+        console.log('spreadsheetURI ', spreadsheetURI) // todo: remove lo
         init()
       }, [spreadsheetURI])
 
-      // useEffect(()=>{
-      //   console.log('poepjes') // todo: remove log
-      //   setAttributes({poep:23})
-      // }, [])
       useEffect(()=>{
-        document.documentElement.addEventListener('what',console.log.bind(console,'eeeh'))
-        console.log('blockProps',blockProps) // todo: remove log
-      }, [])
+        document.documentElement.addEventListener('what', onExternalEvent)
+        return ()=>document.documentElement.removeEventListener('what', onExternalEvent)
+      }, [setAttributes])
+
+      // useEffect(()=>{
+      //   document.documentElement.addEventListener('what',console.log.bind(console,'eeeh'))
+      // }, [])
 
       return (<Fragment>
             <InspectorControls>
@@ -110,7 +144,7 @@ registerBlockType( 'spreadsheet/block', {
                   />
                 </MediaUploadCheck>
               </PanelBody>
-              <PanelBody>
+              {/*<PanelBody>
                 <div>
                   <fieldset>
                     <TextControl
@@ -121,16 +155,15 @@ registerBlockType( 'spreadsheet/block', {
                     />
                   </fieldset>
                 </div>
-              </PanelBody>
+              </PanelBody>*/}
             </InspectorControls>
-            <div {...blockProps} onClick={console.log.bind(console, 'admin click')}>
-              {/*<button onClick={console.log.bind(console, 'button click')}>hallo</button>*/}
+            <div {...blockProps} onClick={onClickAdmin}>
               {view(attributes, true)}
             </div>
           </Fragment>)
     },
     save(props) {
-        const {attributes, attributes: {spreadsheetURI, linkLabel}} = props
+        const {attributes, attributes: {spreadsheetURI, hide/*, linkLabel, foo*/}} = props
         const blockProps = useBlockProps.save( { style: blockStyle } )
         console.log('save',{props,blockProps}) // todo: remove log
         return view(attributes)
