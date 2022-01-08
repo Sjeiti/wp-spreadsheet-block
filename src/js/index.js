@@ -9,6 +9,8 @@ console.log('spreadsheetblock',23) // todo: remove log
 
 nextFrame(init, 3)
 
+export const spreadsheetEvent = 'spreadsheetEvent'
+
 export function init(){
   Array.from(document.querySelectorAll('[data-spreadsheet-block]')).forEach(element=>{
     const isTest = element.matches('[data-test]')
@@ -146,6 +148,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         const className = `x${x} y${y}`
         const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className}):{className}
         const td = createElement('td',tr,params)
+        // todo: set classnames depening on editable or head (or maybe head is th)
         value&&td.appendChild(createTextNode(value))
       }
     }
@@ -159,19 +162,24 @@ function onChangeOutput(hfInstance, e) {
   if (['hide','editable','head'].includes(command)) {
     console.log('onChangeOutput', spreadsheet, command, param, checked) // todo: remove log
     //
-    document.documentElement.dispatchEvent(new CustomEvent('what', {detail: {
-        spreadsheet, command, param, checked
-      }}))
+    dispatchEvent(command, {spreadsheet, param, checked})
   }
 }
 
 function onClickOutput(hfInstance, e) {
   const {target, target: {dataset: {x, y, type}}} = e
-  if (x&&y&&type==='n') {
-    console.log('onClickOutput', x, y, type) // todo: remove log
-    const wrapper = target.closest('[data-sheet]')
+  console.log('onClickOutput', e) // todo: remove log
+
+  const wrapper = target.closest('[data-sheet]')
+  if (wrapper) {
     const sheetName = wrapper.dataset.sheet
+    const cellPosition = getCellId(sheetName, x, y)
+    console.log('\t',cellPosition) // todo: remove log
+
+    // todo dispatch for non-number types
+
     const sheet = hfInstance.getSheetId(sheetName)
+    console.log('\t', x, y, type, sheetName) // todo: remove log
     //
     const col = parseInt(x,10)
     const row = parseInt(y,10)
@@ -181,12 +189,12 @@ function onClickOutput(hfInstance, e) {
     const cellFormula = hfInstance.getCellFormula(cellAddress)
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
     //
-    document.documentElement.dispatchEvent(new CustomEvent('what', {detail: {
-        col, row, cellValue
-      }}))
+    dispatchEvent('cell', {col, row, cellValue, sheetName})
     //
-    if (cellFormula===undefined&&canSetContents) {
-      hfInstance.setCellContents(cellAddress, cellValue + 1)
+    if (x&&y&&type==='n') {
+      if (cellFormula===undefined&&canSetContents) {
+        hfInstance.setCellContents(cellAddress, cellValue + 1)
+      }
     }
   }
 }
@@ -200,8 +208,19 @@ function onHyperFormulaValuesUpdated(hfInstance, parent, changed){
   })
 }
 
+function dispatchEvent(command, data){
+  document.documentElement.dispatchEvent(new CustomEvent(spreadsheetEvent, {detail: {
+      command, ...data
+    }}))
+}
+
 function getInputName(sheet,...names) {
   return sheet+'_'+names.join('_')
+}
+
+
+export function getCellId(sheetName, col, row) {
+  return `${sheetName}!${col}-${row}`
 }
 
 let spreadsheetIndex = 0

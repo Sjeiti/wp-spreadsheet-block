@@ -10,7 +10,7 @@ import { PanelBody,   Button, TextControl } from '@wordpress/components'
 import { Fragment } from '@wordpress/element'
 import { __ } from '@wordpress/i18n'
 
-import {init} from '../js/index'
+import {getCellId,init,spreadsheetEvent} from '../js/index'
 
 // const __ = ss=>ss
 const ssb = 'ssb'
@@ -33,6 +33,13 @@ function view(attr, admin) {
     ></div>
 }
 
+// todo below method not yet working properly
+function toggleEntry(array, entry, forceAdd) {
+  return (array.includes(entry)&&!forceAdd)
+      &&array.filter(s=>s!==entry)
+      ||[...array, entry]
+}
+
 registerBlockType( 'spreadsheet/block', {
     apiVersion: 2,
     title: 'Spreadsheet block',
@@ -46,6 +53,14 @@ registerBlockType( 'spreadsheet/block', {
         default: ''
       },
       hide: {
+        type: 'array',
+        default: []
+      },
+      editable: {
+        type: 'array',
+        default: []
+      },
+      head: {
         type: 'array',
         default: []
       }
@@ -68,10 +83,14 @@ registerBlockType( 'spreadsheet/block', {
     },
 
     edit(props) {
-      const {setAttributes, attributes, attributes: {spreadsheetURI, hide}} = props
+      const {setAttributes, attributes, attributes: {spreadsheetURI, hide, editable, head}} = props
 
       const blockProps = useBlockProps( { style: blockStyle } );
       blockProps.className += ' components-placeholder is-large  spreadsheet-wrapper'
+
+
+      const [isEditable, setEditable] = useState(false)
+      const [isHead, setHead] = useState(false)
 
       // console.log('props',props) // todo: remove log
       // console.log('blockProps',blockProps) //  todo: remove log
@@ -86,11 +105,6 @@ registerBlockType( 'spreadsheet/block', {
         })
       }
 
-      // const onChangeLinkLabel = ( newLinkLabel ) => {
-      //   console.log('onChangeLinkLabel',newLinkLabel) // todo: remove log
-      //   setAttributes( { linkLabel: newLinkLabel === undefined ? '' : newLinkLabel } )
-      // }
-
       const onClickAdmin = (e) => {
         console.log('onClickAdmin', e) // todo: remove log
         // const {target, currentTarget} = e.nativeEvent
@@ -104,12 +118,26 @@ registerBlockType( 'spreadsheet/block', {
       }
 
       const onExternalEvent = (e)=>{
-        const {command, param, spreadsheet, checked} = e.detail
-        console.log('onExternalEvent', {checked, command, param, spreadsheet}) // todo: remove log
+        const {command, ...data} = e.detail
+        console.log('onExternalEvent', e.detail) // todo: remove log
         if (command==='hide') {
-          const copy = hide.slice(0)
-          const newHide = checked&&[...copy, param]||copy.filter(s=>s!==param) // todo might append
-          setAttributes( { hide: newHide } )
+          const {param, checked} = data
+          // const copy = hide.slice(0)
+          // const newHide = checked&&[...copy, param]||copy.filter(s=>s!==param) // todo might append
+          // setAttributes( { hide: newHide } )
+          setAttributes( { hide: toggleEntry(hide, param, checked) } )
+        } else if (command==='editable') {
+          const {checked} = data
+          setEditable(checked)
+        } else if (command==='head') {
+          const {checked} = data
+          setHead(checked)
+        } else if (command==='cell') {
+          const {col, row, sheetName} = data
+          const cellId = getCellId(sheetName, col, row)
+          console.log('cell',{isEditable,isHead}) // todo: remove log
+          isEditable&&setAttributes( { editable: toggleEntry(editable, cellId) } )
+          isHead&&setAttributes( { head: toggleEntry(head, cellId) } )
         }
       }
 
@@ -119,9 +147,9 @@ registerBlockType( 'spreadsheet/block', {
       }, [spreadsheetURI])
 
       useEffect(()=>{
-        document.documentElement.addEventListener('what', onExternalEvent)
-        return ()=>document.documentElement.removeEventListener('what', onExternalEvent)
-      }, [setAttributes])
+        document.documentElement.addEventListener(spreadsheetEvent, onExternalEvent)
+        return ()=>document.documentElement.removeEventListener(spreadsheetEvent, onExternalEvent)
+      }, [setAttributes, isEditable, isHead])
 
       // useEffect(()=>{
       //   document.documentElement.addEventListener('what',console.log.bind(console,'eeeh'))
@@ -144,18 +172,6 @@ registerBlockType( 'spreadsheet/block', {
                   />
                 </MediaUploadCheck>
               </PanelBody>
-              {/*<PanelBody>
-                <div>
-                  <fieldset>
-                    <TextControl
-                      label={__( 'Link label', ssb )}
-                      value={ linkLabel }
-                      onChange={ onChangeLinkLabel }
-                      help={ __( 'Add link label', ssb )}
-                    />
-                  </fieldset>
-                </div>
-              </PanelBody>*/}
             </InspectorControls>
             <div {...blockProps} onClick={onClickAdmin}>
               {view(attributes, true)}
@@ -165,7 +181,7 @@ registerBlockType( 'spreadsheet/block', {
     save(props) {
         const {attributes, attributes: {spreadsheetURI, hide/*, linkLabel, foo*/}} = props
         const blockProps = useBlockProps.save( { style: blockStyle } )
-        console.log('save',{props,blockProps}) // todo: remove log
+        console.log('save',props.attributes) // todo: remove log
         return view(attributes)
     }
 } )
