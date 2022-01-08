@@ -7,46 +7,44 @@ import {cellToXY} from './utils/spreadsheet'
 
 console.log('spreadsheetblock',23) // todo: remove log
 
-nextFrame(init, 3)
-
 export const spreadsheetEvent = 'spreadsheetEvent'
+
+const className = {
+  editable: 'editable'
+}
+
+nextFrame(init, 3)
 
 export function init(){
   Array.from(document.querySelectorAll('[data-spreadsheet-block]')).forEach(element=>{
     const isTest = element.matches('[data-test]')
+    const {spreadsheetBlock} = element.dataset
+    const data = spreadsheetBlock&&JSON.parse(spreadsheetBlock)||{}
     if (!isTest) {
-      const data = JSON.parse(element.dataset.spreadsheetBlock)
-      const {spreadsheetURI, hide, admin} = data
-      console.log('init',{spreadsheetURI, hide, admin}) // todo: remove log
-      fetch(spreadsheetURI)
+      fetch(data.spreadsheetURI)
         .then(response => response.ok?response.arrayBuffer():(()=>{throw new Error(response.status)})())
         .then(buffer=>loadedResultToSpreadsheetTable(element, buffer, data))
         .catch(console.error.bind(console))
     } else {
       // location.hostname==='localhost'&&overwriteLog()
       const inputFile = document.getElementById('file')
-      inputFile.addEventListener('change', onInputFileChange)
+      inputFile.addEventListener('change', onInputFileChange.bind(null, data))
       inputFile.value && inputFile.dispatchEvent(new Event('change'))
     }
   })
 }
 
-function onInputFileChange(event){
+function onInputFileChange(data, event){
   const [file] = event.target.files
   const reader = new FileReader()
-  reader.addEventListener('load', onFileReaderLoad)
+  reader.addEventListener('load', onFileReaderLoad.bind(null, data))
   reader.readAsBinaryString(file)
-  // getBase64(file)
 }
 
-function onFileReaderLoad(e) {
-  const data = e.target.result
-
+function onFileReaderLoad(data, e) {
   const output = document.querySelector('[data-spreadsheet-block]')
-  const hfInstance = loadedResultToSpreadsheetTable(output, data)
-
-  // output.addEventListener('click', onClickOutput.bind(null, hfInstance))
-  // hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, output))
+  const {result} = e.target
+  loadedResultToSpreadsheetTable(output, result, data)
 }
 
 function loadedResultToSpreadsheetTable(target, buffer, data) {
@@ -58,6 +56,7 @@ function loadedResultToSpreadsheetTable(target, buffer, data) {
   while (target.children.length) target.removeChild(target.children[0])
   target.appendChild(getSpreadsheetFragment(spreadSheetData, data))
   //
+  console.log('foo',23,target) // todo: remove log
   target.addEventListener('click', onClickOutput.bind(null, hfInstance))
   target.addEventListener('change', onChangeOutput.bind(null, hfInstance))
   hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, target))
@@ -96,7 +95,7 @@ function getHyperFormulaInstance(spreadSheetData) {
 }
 
 function getSpreadsheetFragment(spreadSheetData, data) {
-  const {admin, hide} = data
+  const {admin=false, hide=[], editable=[], head=[]} = data
   const createTextNode = document.createTextNode.bind(document)
   const fragment = document.createDocumentFragment()
   const spreadSheetName = getSpreadsheetName()
@@ -145,11 +144,14 @@ function getSpreadsheetFragment(spreadSheetData, data) {
       for (let j=0;j<maxLength;j++) {
         const cell = row[j]
         const {x, y, type, formula, value} = cell||{}
-        const className = `x${x} y${y}`
+        const cellId = getCellId(name, x, y)
+        const isHead = head.includes(cellId)
+        const isEditable = editable.includes(cellId)
+        const className = `x${x} y${y}`+(isEditable?' editable':'')
         const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className}):{className}
-        const td = createElement('td',tr,params)
-        // todo: set classnames depening on editable or head (or maybe head is th)
-        value&&td.appendChild(createTextNode(value))
+        const tableCellType = isHead&&'th'||'td'
+        const tx = createElement(tableCellType,tr,params)
+        value&&tx.appendChild(createTextNode(value))
       }
     }
   })
@@ -160,23 +162,19 @@ function onChangeOutput(hfInstance, e) {
   const {target: {name, checked}} = e
   const [spreadsheet, command, param] = name.split(/_/g)
   if (['hide','editable','head'].includes(command)) {
-    console.log('onChangeOutput', spreadsheet, command, param, checked) // todo: remove log
-    //
     dispatchEvent(command, {spreadsheet, param, checked})
   }
 }
 
 function onClickOutput(hfInstance, e) {
-  const {target, target: {dataset: {x, y, type}}} = e
   console.log('onClickOutput', e) // todo: remove log
+  const {target, target: {dataset: {x, y, type}}} = e
 
   const wrapper = target.closest('[data-sheet]')
   if (wrapper) {
     const sheetName = wrapper.dataset.sheet
     const cellPosition = getCellId(sheetName, x, y)
     console.log('\t',cellPosition) // todo: remove log
-
-    // todo dispatch for non-number types
 
     const sheet = hfInstance.getSheetId(sheetName)
     console.log('\t', x, y, type, sheetName) // todo: remove log

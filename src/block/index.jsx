@@ -11,6 +11,7 @@ import { Fragment } from '@wordpress/element'
 import { __ } from '@wordpress/i18n'
 
 import {getCellId,init,spreadsheetEvent} from '../js/index'
+import {toggleEntry} from '../js/utils'
 
 // const __ = ss=>ss
 const ssb = 'ssb'
@@ -31,13 +32,6 @@ function view(attr, admin) {
   return <div
       data-spreadsheet-block={JSON.stringify({...attr, ...(admin&&{admin}||{})})}
     ></div>
-}
-
-// todo below method not yet working properly
-function toggleEntry(array, entry, forceAdd) {
-  return (array.includes(entry)&&!forceAdd)
-      &&array.filter(s=>s!==entry)
-      ||[...array, entry]
 }
 
 registerBlockType( 'spreadsheet/block', {
@@ -64,22 +58,6 @@ registerBlockType( 'spreadsheet/block', {
         type: 'array',
         default: []
       }
-      // data: {
-      //   type: 'object',
-      //   default: {
-      //     hide: [],
-      //     editable: {},
-      //     head: {}
-      //   }
-      // },
-      // linkLabel: {
-      //   type: 'string',
-      //   default: ''
-      // },
-      // foo: {
-      //   type: 'string',
-      //   default: ''
-      // }
     },
 
     edit(props) {
@@ -91,12 +69,6 @@ registerBlockType( 'spreadsheet/block', {
 
       const [isEditable, setEditable] = useState(false)
       const [isHead, setHead] = useState(false)
-
-      // console.log('props',props) // todo: remove log
-      // console.log('blockProps',blockProps) //  todo: remove log
-      // console.log('this.foo',this.foo()) //  todo: remove log
-      // console.log('this.foo',this) //  todo: remove log
-
       const onSelectMedia = (media) => {
         console.log('onSelectMedia',media) // todo: remove log
         setAttributes({
@@ -122,9 +94,6 @@ registerBlockType( 'spreadsheet/block', {
         console.log('onExternalEvent', e.detail) // todo: remove log
         if (command==='hide') {
           const {param, checked} = data
-          // const copy = hide.slice(0)
-          // const newHide = checked&&[...copy, param]||copy.filter(s=>s!==param) // todo might append
-          // setAttributes( { hide: newHide } )
           setAttributes( { hide: toggleEntry(hide, param, checked) } )
         } else if (command==='editable') {
           const {checked} = data
@@ -135,7 +104,6 @@ registerBlockType( 'spreadsheet/block', {
         } else if (command==='cell') {
           const {col, row, sheetName} = data
           const cellId = getCellId(sheetName, col, row)
-          console.log('cell',{isEditable,isHead}) // todo: remove log
           isEditable&&setAttributes( { editable: toggleEntry(editable, cellId) } )
           isHead&&setAttributes( { head: toggleEntry(head, cellId) } )
         }

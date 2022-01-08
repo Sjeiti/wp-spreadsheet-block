@@ -30,3 +30,17 @@ export function createElement(name,parent,attr){
   parent?.appendChild(element)
   return element
 }
+
+export function toggleEntry(array, entry, forceAdd) {
+  return (array.includes(entry)&&!forceAdd)
+      &&array.filter(s=>s!==entry)
+      ||[...array, ...array.includes(entry)&&[]||[entry]]
+}
+// console.log('toggleEntry',toggleEntry([1],2)) // todo: remove log
+// console.log('toggleEntry',toggleEntry([1],1)) // todo: remove log
+// console.log('toggleEntry',toggleEntry([1,2],2)) // todo: remove log
+// console.log('toggleEntry',toggleEntry([1,2],1)) // todo: remove log
+// console.log('toggleEntry',toggleEntry([1,2],2,true)) // todo: remove log
+// console.log('toggleEntry',toggleEntry([1,2],1,true)) // todo: remove log
+// console.log('toggleEntry',toggleEntry([1],2,true)) // todo: remove log
+// console.log('toggleEntry',toggleEntry([1],1,true)) // todo: remove log

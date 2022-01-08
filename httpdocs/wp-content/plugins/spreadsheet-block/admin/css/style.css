@@ -11,6 +11,10 @@
   order: -2;
   flex: 0 0 100%;
 }
+[data-spreadsheet-block] .nav {
+  width: 100%;
+  order: -2;
+}
 [data-spreadsheet-block] input.visually-hidden + label {
   order: -1;
   cursor: pointer;
@@ -35,6 +39,14 @@
   overflow: hidden;
   padding: 0;
   position: absolute;
+}
+
+.x0 {
+  font-style: italic;
+}
+
+.y0 {
+  color: red;
 }
 
 .spreadsheet-wrapper {
