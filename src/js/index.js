@@ -10,7 +10,9 @@ console.log('spreadsheetblock',23) // todo: remove log
 export const spreadsheetEvent = 'spreadsheetEvent'
 
 const className = {
-  editable: 'editable'
+  editable: 'editable',
+  admin: 'admin',
+  nav: 'nav'
 }
 
 nextFrame(init, 3)
@@ -73,7 +75,7 @@ function getSpreadsheetData(workbook) {
             .map(([cellName, cell])=>{
               const {t:type,v:value,f:fnc/*,r:formatted*/,c:comments} = cell // t,v,r,h,f,w
               const [x, y] = cellToXY(cellName)
-              const formula = fnc&&'='+fnc||fnc // weird high numbrs for some xls function values
+              const formula = fnc&&'='+fnc||fnc // weird high numbers for some xls function values
               const row = colRows[y]||(colRows[y] = [])
               const comment = comments?.[0]?.t
               row[x] = {x, y, type, formula, value/*, format*/, comment}
@@ -101,7 +103,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
   const spreadSheetName = getSpreadsheetName()
   //
   if (admin){
-    const div = createElement('div',fragment,{className:'nav'})
+    const div = createElement('div',fragment,{className:className.nav})
     ;['editable','head'].forEach(name=>{
       const label = createElement('label',div,{})
       label.appendChild(createTextNode(name))
@@ -134,7 +136,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         ,...(isSheetHidden?{checked:true}:{})
       })
     }
-    const table = createElement('table',fragment)
+    const table = createElement('table',fragment,{className:admin?className.admin:''})
     table.dataset.sheet = name
     const tbody = createElement('tbody',table)
     const maxLength = Math.max(...rows.map(row=>row.length))
@@ -147,7 +149,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         const cellId = getCellId(name, x, y)
         const isHead = head.includes(cellId)
         const isEditable = editable.includes(cellId)
-        const className = `x${x} y${y}`+(isEditable?' editable':'')
+        const className = `x${x} y${y}`+(isEditable?' '+className.editable:'')
         const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className}):{className}
         const tableCellType = isHead&&'th'||'td'
         const tx = createElement(tableCellType,tr,params)
