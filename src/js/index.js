@@ -12,8 +12,15 @@ export const spreadsheetEvent = 'spreadsheetEvent'
 const className = {
   editable: 'editable',
   admin: 'admin',
-  nav: 'nav'
+  nav: 'nav',
+  visuallyHidden: 'visually-hidden'
 }
+const command = {
+  hide: 'hide',
+  editable: 'editable',
+  head: 'head'
+}
+const cellOptions = [command.editable, command.head]
 
 nextFrame(init, 3)
 
@@ -58,7 +65,6 @@ function loadedResultToSpreadsheetTable(target, buffer, data) {
   while (target.children.length) target.removeChild(target.children[0])
   target.appendChild(getSpreadsheetFragment(spreadSheetData, data))
   //
-  console.log('foo',23,target) // todo: remove log
   target.addEventListener('click', onClickOutput.bind(null, hfInstance))
   target.addEventListener('change', onChangeOutput.bind(null, hfInstance))
   hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, target))
@@ -104,7 +110,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
   //
   if (admin){
     const div = createElement('div',fragment,{className:className.nav})
-    ;['editable','head'].forEach(name=>{
+    cellOptions.forEach(name=>{
       const label = createElement('label',div,{})
       label.appendChild(createTextNode(name))
       createElement('input',label,{
@@ -125,7 +131,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         type: 'radio'
         ,name: getInputName(spreadSheetName,'tab')
         ,id
-        ,className: 'visually-hidden'
+        ,className: className.visuallyHidden
         ,...(sheetIndex===0?{checked:true}:{})
       })
       const label = createElement('label',fragment,{ for: id })
@@ -163,8 +169,18 @@ function getSpreadsheetFragment(spreadSheetData, data) {
 function onChangeOutput(hfInstance, e) {
   const {target: {name, checked}} = e
   const [spreadsheet, command, param] = name.split(/_/g)
-  if (['hide','editable','head'].includes(command)) {
+  if ([command.hide,...cellOptions].includes(command)) {
+    
+    if (command===command.hide) {
+     // todo implement
+    } else if (command===command.head) {
+     // todo implement
+    } else if (command===command.editable) {
+     // todo implement
+    }
+
     dispatchEvent(command, {spreadsheet, param, checked})
+
   }
 }
 
