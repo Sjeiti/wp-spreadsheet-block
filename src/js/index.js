@@ -13,6 +13,8 @@ const className = {
   editable: 'editable',
   admin: 'admin',
   nav: 'nav',
+  addingEditable: 'adding-editable',
+  addingHead: 'adding-head',
   visuallyHidden: 'visually-hidden'
 }
 const command = {
@@ -29,6 +31,8 @@ export function init(){
     const isTest = element.matches('[data-test]')
     const {spreadsheetBlock} = element.dataset
     const data = spreadsheetBlock&&JSON.parse(spreadsheetBlock)||{}
+    const {admin} = data
+    admin&&element.classList.add(className.admin)
     if (!isTest) {
       fetch(data.spreadsheetURI)
         .then(response => response.ok?response.arrayBuffer():(()=>{throw new Error(response.status)})())
@@ -142,7 +146,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         ,...(isSheetHidden?{checked:true}:{})
       })
     }
-    const table = createElement('table',fragment,{className:admin?className.admin:''})
+    const table = createElement('table',fragment)
     table.dataset.sheet = name
     const tbody = createElement('tbody',table)
     const maxLength = Math.max(...rows.map(row=>row.length))
@@ -155,8 +159,8 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         const cellId = getCellId(name, x, y)
         const isHead = head.includes(cellId)
         const isEditable = editable.includes(cellId)
-        const className = `x${x} y${y}`+(isEditable?' '+className.editable:'')
-        const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className}):{className}
+        const classNames = `x${x} y${y}`+(isEditable?' '+className.editable:'')
+        const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className:classNames}):{className:classNames}
         const tableCellType = isHead&&'th'||'td'
         const tx = createElement(tableCellType,tr,params)
         value&&tx.appendChild(createTextNode(value))
@@ -167,35 +171,43 @@ function getSpreadsheetFragment(spreadSheetData, data) {
 }
 
 function onChangeOutput(hfInstance, e) {
-  const {target: {name, checked}} = e
-  const [spreadsheet, command, param] = name.split(/_/g)
-  if ([command.hide,...cellOptions].includes(command)) {
-    
-    if (command===command.hide) {
-     // todo implement
-    } else if (command===command.head) {
-     // todo implement
-    } else if (command===command.editable) {
-     // todo implement
+  const {currentTarget, target: {name, checked}} = e
+  const [spreadsheet, commandFromName, param] = name.split(/_/g)
+  if ([command.hide,...cellOptions].includes(commandFromName)) {
+    if (commandFromName===command.head) {
+      currentTarget.classList.toggle(className.addingHead, checked)
+    } else if (commandFromName===command.editable) {
+      currentTarget.classList.toggle(className.addingEditable, checked)
     }
-
-    dispatchEvent(command, {spreadsheet, param, checked})
-
+    dispatchEvent(commandFromName, {spreadsheet, param, checked})
   }
 }
 
 function onClickOutput(hfInstance, e) {
   console.log('onClickOutput', e) // todo: remove log
   const {target, target: {dataset: {x, y, type}}} = e
-
-  const wrapper = target.closest('[data-sheet]')
-  if (wrapper) {
-    const sheetName = wrapper.dataset.sheet
+  const table = target.closest('[data-sheet]')
+  const isValidTarget = x&&y
+  if (table&&isValidTarget) {
+    const wrapper = table.parentNode
+    const isAddingEditable = wrapper.classList.contains(className.addingEditable)
+    const isAddingHead = wrapper.classList.contains(className.addingHead)
+    //
+    const isAdmin = wrapper.classList.contains(className.admin)
+    const isEditable = target.classList.contains(className.editable)
+    const isHead = target.classList.contains(className.head)
+    console.log('\tisEditable',isEditable,target) // todo: remove log
+    //
+    isAddingEditable&&target.classList.toggle(className.editable)
+    if (isAddingHead) {
+      // todo replace nodeName
+    }
+    //
+    const sheetName = table.dataset.sheet
     const cellPosition = getCellId(sheetName, x, y)
     console.log('\t',cellPosition) // todo: remove log
-
+    //
     const sheet = hfInstance.getSheetId(sheetName)
-    console.log('\t', x, y, type, sheetName) // todo: remove log
     //
     const col = parseInt(x,10)
     const row = parseInt(y,10)
@@ -207,7 +219,7 @@ function onClickOutput(hfInstance, e) {
     //
     dispatchEvent('cell', {col, row, cellValue, sheetName})
     //
-    if (x&&y&&type==='n') {
+    if (x&&y&&type==='n'&&isEditable&&!isAddingEditable) {
       if (cellFormula===undefined&&canSetContents) {
         hfInstance.setCellContents(cellAddress, cellValue + 1)
       }
@@ -242,7 +254,6 @@ export function getCellId(sheetName, col, row) {
 let spreadsheetIndex = 0
 function getSpreadsheetName() {
   return 'spreadsheet'+(spreadsheetIndex++)
-  // return 'spreadsheet'+Date.now()+(Math.random()*1E9<<0)
 }
 
 function getBase64(file) {

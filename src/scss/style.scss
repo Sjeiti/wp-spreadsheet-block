@@ -29,13 +29,15 @@
       display: block;
     }
   }
-  .admin {
-    [data-type='n'] {
-      $color-edit: #e6e6c7;
-      background: linear-gradient(135deg, $color-edit 0% 50%, transparent 50% 100%);
-      background-size: 100% 100%;
-      &.editable { background: $color-edit; }
+  &.admin {
+    &.adding-editable {
+      [data-type='n'] {
+        background: linear-gradient(135deg, #F8F888 0% 50%, transparent 50% 100%);
+        background-size: 100% 100%;
+        &.editable { background: #FF0; }
+      }
     }
+    .editable { background: #FF0; }
   }
 }
 

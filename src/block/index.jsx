@@ -110,14 +110,14 @@ registerBlockType( 'spreadsheet/block', {
       }
 
       useEffect(()=>{
-        console.log('spreadsheetURI ', spreadsheetURI) // todo: remove lo
+        console.log('spreadsheetURI', spreadsheetURI) // todo: remove lo
         init()
       }, [spreadsheetURI])
 
       useEffect(()=>{
         document.documentElement.addEventListener(spreadsheetEvent, onExternalEvent)
         return ()=>document.documentElement.removeEventListener(spreadsheetEvent, onExternalEvent)
-      }, [setAttributes, isEditable, isHead])
+      }, [setAttributes, isEditable, isHead, editable, head])
 
       // useEffect(()=>{
       //   document.documentElement.addEventListener('what',console.log.bind(console,'eeeh'))

@@ -29,12 +29,15 @@
 [data-spreadsheet-block] input.visually-hidden:checked + label + [data-sheet] {
   display: block;
 }
-[data-spreadsheet-block] .admin [data-type=n] {
-  background: linear-gradient(135deg, #e6e6c7 0% 50%, transparent 50% 100%);
+[data-spreadsheet-block].admin.adding-editable [data-type=n] {
+  background: linear-gradient(135deg, #F8F888 0% 50%, transparent 50% 100%);
   background-size: 100% 100%;
 }
-[data-spreadsheet-block] .admin [data-type=n].editable {
-  background: #e6e6c7;
+[data-spreadsheet-block].admin.adding-editable [data-type=n].editable {
+  background: #FF0;
+}
+[data-spreadsheet-block].admin .editable {
+  background: #FF0;
 }
 
 .visually-hidden {
