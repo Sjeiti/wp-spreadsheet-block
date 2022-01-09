@@ -39,7 +39,7 @@ export function init(){
         .then(buffer=>loadedResultToSpreadsheetTable(element, buffer, data))
         .catch(console.error.bind(console))
     } else {
-      // location.hostname==='localhost'&&overwriteLog()
+      location.hostname==='localhost'&&overwriteLog()
       const inputFile = document.getElementById('file')
       inputFile.addEventListener('change', onInputFileChange.bind(null, data))
       inputFile.value && inputFile.dispatchEvent(new Event('change'))
@@ -200,7 +200,14 @@ function onClickOutput(hfInstance, e) {
     //
     isAddingEditable&&target.classList.toggle(className.editable)
     if (isAddingHead) {
-      // todo replace nodeName
+      const isTd = target.nodeName==='TD'
+      const newNodeName = isTd?'th':'td'
+      const {parentNode,childNodes} = target
+      const newElement = document.createElement(newNodeName)
+      Array.from(target.attributes).forEach(({name,value})=>newElement.setAttribute(name,value))
+      while (childNodes.length) newElement.appendChild(childNodes[0])
+      parentNode.insertBefore(newElement, target)
+      parentNode.removeChild(target)
     }
     //
     const sheetName = table.dataset.sheet
