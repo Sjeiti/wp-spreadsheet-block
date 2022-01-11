@@ -39,6 +39,31 @@
     }
     .editable { background: #FF0; }
   }
+  .hide-label {
+    display: inline-block;
+    width: 2rem;
+    height: 1.25rem;
+    margin: 0 0.25rem;
+    //stoke: currentColor;
+    background-image:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><path fill="white" d="M16 9c9 0 13 7 13 7s-4 7-13 7-13-7-13-7 4-7 13-7zm0 1c-8 0-12 6-12 6s4 6 12 6 12-6 12-6-4-6-12-6zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-1a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>');
+    background-size: 100%;
+    background-position: 0 -0.375rem;
+    vertical-align: middle;
+  }
+  :checked+.hide-label {
+    background-image:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><path fill="white" d="M8.1 20.9C4.6 18.9 3 16 3 16s4-7 13-7c1.3 0 2.5.1 3.6.4l-.8.8L16 10c-8 0-11.8 6-11.8 6s1.5 2.4 4.6 4.2l-.7.7zm4.3 1.7c1.1.3 2.3.4 3.6.4 9 0 13-7 13-7s-1.6-2.8-5.1-4.9l-.7.7c3 1.8 4.6 4.2 4.6 4.2S24 22 16 22c-1 0-1.9 0-2.8-.2l-.8.8zm7.5-7.5.1.9a4 4 0 0 1-4.9 3.9l.9-.9a3 3 0 0 0 3-3l.9-.9zm-3-3a4 4 0 0 0-4.8 4.8l.9-.9a3 3 0 0 1 3-3l.9-.9zM24 7 7 24l1 1L25 8l-1-1z"/></svg>');
+  }
+  .cell-edit {
+    display: inline-block;
+    margin: 0 0.25rem;
+    padding: 0 0.25rem;
+  }
+  input:checked+label.cell-edit {
+    box-shadow: 0 0 0 1px currentColor;
+    text-decoration: none;
+  }
 }
 
 .visually-hidden {
@@ -51,3 +76,4 @@
   padding: 0;
   position: absolute;
 }
+

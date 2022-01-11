@@ -15,7 +15,9 @@ const className = {
   nav: 'nav',
   addingEditable: 'adding-editable',
   addingHead: 'adding-head',
-  visuallyHidden: 'visually-hidden'
+  visuallyHidden: 'visually-hidden',
+  hideLabel: 'hide-label',
+  cellEdit: 'cell-edit'
 }
 const command = {
   hide: 'hide',
@@ -71,6 +73,8 @@ function loadedResultToSpreadsheetTable(target, buffer, data) {
   //
   target.addEventListener('click', onClickOutput.bind(null, hfInstance))
   target.addEventListener('change', onChangeOutput.bind(null, hfInstance))
+  target.addEventListener('input', onCellInput.bind(null, hfInstance))
+
   hfInstance.on('valuesUpdated', onHyperFormulaValuesUpdated.bind(null, hfInstance, target))
   //
   return hfInstance
@@ -114,13 +118,17 @@ function getSpreadsheetFragment(spreadSheetData, data) {
   //
   if (admin){
     const div = createElement('div',fragment,{className:className.nav})
+    div.appendChild(createTextNode('cell options: '))
     cellOptions.forEach(name=>{
-      const label = createElement('label',div,{})
-      label.appendChild(createTextNode(name))
-      createElement('input',label,{
-        type: 'checkbox'
+      const id = spreadSheetName+'cell'+name
+      createElement('input',div,{
+        id
+        ,type: 'checkbox'
         ,name: getInputName(spreadSheetName,name)
+        ,className: className.visuallyHidden
       })
+      createElement('label',div,{for:id, className:className.cellEdit})
+          .appendChild(createTextNode(name))
     })
   }
   //
@@ -140,11 +148,20 @@ function getSpreadsheetFragment(spreadSheetData, data) {
       })
       const label = createElement('label',fragment,{ for: id })
       label.appendChild(createTextNode(name))
-      admin&&createElement('input',label,{
-        type: 'checkbox'
-        ,name: getInputName(spreadSheetName,'hide',name)
-        ,...(isSheetHidden?{checked:true}:{})
-      })
+      if (admin){
+        const hideName = getInputName(spreadSheetName,'hide',name)
+        createElement('input',label,{
+          type: 'checkbox'
+          ,name: hideName 
+          ,id: hideName 
+          ,...(isSheetHidden?{checked:true}:{})
+          ,className: className.visuallyHidden
+        })
+        createElement('label',label,{
+          className: className.hideLabel
+          ,for: hideName 
+        })
+      }
     }
     const table = createElement('table',fragment)
     table.dataset.sheet = name
@@ -161,6 +178,7 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         const isEditable = editable.includes(cellId)
         const classNames = `x${x} y${y}`+(isEditable?' '+className.editable:'')
         const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className:classNames}):{className:classNames}
+        //isEditable&&(params['contenteditable'] = 'true')
         const tableCellType = isHead&&'th'||'td'
         const tx = createElement(tableCellType,tr,params)
         value&&tx.appendChild(createTextNode(value))
@@ -225,6 +243,44 @@ function onClickOutput(hfInstance, e) {
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
     //
     dispatchEvent('cell', {col, row, cellValue, sheetName})
+    //
+    if (x&&y&&type==='n'&&isEditable&&!isAddingEditable) {
+      if (cellFormula===undefined&&canSetContents) {
+        hfInstance.setCellContents(cellAddress, cellValue + 1)
+      }
+    }
+  }
+}
+
+function onCellInput(hfInstance, e){
+  console.log('onCellInput')
+  return
+  const {target, target: {dataset: {x, y, type}}} = e
+  const table = target.closest('[data-sheet]')
+  const isValidTarget = x&&y
+  if (table&&isValidTarget) {
+    const wrapper = table.parentNode
+    const isAddingEditable = wrapper.classList.contains(className.addingEditable)
+    const isAddingHead = wrapper.classList.contains(className.addingHead)
+    //
+    const isAdmin = wrapper.classList.contains(className.admin)
+    const isEditable = target.classList.contains(className.editable)
+    //
+    const sheetName = table.dataset.sheet
+    const cellPosition = getCellId(sheetName, x, y)
+    console.log('\t',cellPosition) // todo: remove log
+    //
+    const sheet = hfInstance.getSheetId(sheetName)
+    //
+    const col = parseInt(x,10)
+    const row = parseInt(y,10)
+    const cellAddress = {col, row, sheet}
+    //
+    const cellValue = hfInstance.getCellValue(cellAddress)
+    const cellFormula = hfInstance.getCellFormula(cellAddress)
+    const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
+    //
+    //dispatchEvent('cell', {col, row, cellValue, sheetName})
     //
     if (x&&y&&type==='n'&&isEditable&&!isAddingEditable) {
       if (cellFormula===undefined&&canSetContents) {
