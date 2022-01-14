@@ -5,8 +5,6 @@ import {nextFrame, createElement} from './utils'
 import '../scss/style.scss'
 import {cellToXY} from './utils/spreadsheet'
 
-console.log('spreadsheetblock',23) // todo: remove log
-
 export const spreadsheetEvent = 'spreadsheetEvent'
 
 const className = {
@@ -17,7 +15,8 @@ const className = {
   addingHead: 'adding-head',
   visuallyHidden: 'visually-hidden',
   hideLabel: 'hide-label',
-  cellEdit: 'cell-edit'
+  cellEdit: 'cell-edit',
+  formula: 'formula'
 }
 const command = {
   hide: 'hide',
@@ -69,7 +68,7 @@ function loadedResultToSpreadsheetTable(target, buffer, data) {
   console.log('spreadSheetData',spreadSheetData) // todo: remove log
   const hfInstance = getHyperFormulaInstance(spreadSheetData)
   while (target.children.length) target.removeChild(target.children[0])
-  target.appendChild(getSpreadsheetFragment(spreadSheetData, data))
+  target.appendChild(getSpreadsheetFragment(hfInstance, spreadSheetData, data))
   //
   target.addEventListener('click', onClickOutput.bind(null, hfInstance))
   target.addEventListener('change', onChangeOutput.bind(null, hfInstance))
@@ -110,7 +109,7 @@ function getHyperFormulaInstance(spreadSheetData) {
   return HyperFormula.buildFromSheets(hfSheets, {licenseKey: 'gpl-v3'})
 }
 
-function getSpreadsheetFragment(spreadSheetData, data) {
+function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
   const {admin=false, hide=[], editable=[], head=[]} = data
   const createTextNode = document.createTextNode.bind(document)
   const fragment = document.createDocumentFragment()
@@ -152,14 +151,14 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         const hideName = getInputName(spreadSheetName,'hide',name)
         createElement('input',label,{
           type: 'checkbox'
-          ,name: hideName 
-          ,id: hideName 
+          ,name: hideName
+          ,id: hideName
           ,...(isSheetHidden?{checked:true}:{})
           ,className: className.visuallyHidden
         })
         createElement('label',label,{
           className: className.hideLabel
-          ,for: hideName 
+          ,for: hideName
         })
       }
     }
@@ -176,9 +175,18 @@ function getSpreadsheetFragment(spreadSheetData, data) {
         const cellId = getCellId(name, x, y)
         const isHead = head.includes(cellId)
         const isEditable = editable.includes(cellId)
-        const classNames = `x${x} y${y}`+(isEditable?' '+className.editable:'')
+        //
+        const isFormula = x!==undefined&&y!==undefined&&(()=>{
+          const cellAddress = getCellAddress(x, y, sheetIndex)
+          const cellFormula = hfInstance.getCellFormula(cellAddress)
+          return cellFormula!==undefined
+        })()
+        //
+        const classNames = `x${x} y${y}`
+            +(isEditable?' '+className.editable:'')
+            +(isFormula?' '+className.formula:'')
         const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className:classNames}):{className:classNames}
-        //isEditable&&(params['contenteditable'] = 'true')
+        isEditable&&(params['contenteditable'] = 'true')
         const tableCellType = isHead&&'th'||'td'
         const tx = createElement(tableCellType,tr,params)
         value&&tx.appendChild(createTextNode(value))
@@ -202,7 +210,6 @@ function onChangeOutput(hfInstance, e) {
 }
 
 function onClickOutput(hfInstance, e) {
-  console.log('onClickOutput', e) // todo: remove log
   const {target, target: {dataset: {x, y, type}}} = e
   const table = target.closest('[data-sheet]')
   const isValidTarget = x&&y
@@ -211,12 +218,15 @@ function onClickOutput(hfInstance, e) {
     const isAddingEditable = wrapper.classList.contains(className.addingEditable)
     const isAddingHead = wrapper.classList.contains(className.addingHead)
     //
-    const isAdmin = wrapper.classList.contains(className.admin)
-    const isEditable = target.classList.contains(className.editable)
-    const isHead = target.classList.contains(className.head)
-    console.log('\tisEditable',isEditable,target) // todo: remove log
-    //
-    isAddingEditable&&target.classList.toggle(className.editable)
+    // toggle cell editable state
+    if (isAddingEditable&&!target.classList.contains(className.formula)) {
+      target.classList.toggle(className.editable)
+      const isEditable = target.classList.contains(className.editable)
+      isEditable
+        &&target.setAttribute('contenteditable', 'true')
+        &&target.removeAttribute('contenteditable')
+    }
+    // toggle cell heading
     if (isAddingHead) {
       const isTd = target.nodeName==='TD'
       const newNodeName = isTd?'th':'td'
@@ -227,48 +237,32 @@ function onClickOutput(hfInstance, e) {
       parentNode.insertBefore(newElement, target)
       parentNode.removeChild(target)
     }
-    //
     const sheetName = table.dataset.sheet
-    const cellPosition = getCellId(sheetName, x, y)
-    console.log('\t',cellPosition) // todo: remove log
-    //
     const sheet = hfInstance.getSheetId(sheetName)
     //
     const col = parseInt(x,10)
     const row = parseInt(y,10)
-    const cellAddress = {col, row, sheet}
+    const cellAddress = getCellAddress(col, row, sheet)
     //
     const cellValue = hfInstance.getCellValue(cellAddress)
-    const cellFormula = hfInstance.getCellFormula(cellAddress)
-    const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
     //
     dispatchEvent('cell', {col, row, cellValue, sheetName})
-    //
-    if (x&&y&&type==='n'&&isEditable&&!isAddingEditable) {
-      if (cellFormula===undefined&&canSetContents) {
-        hfInstance.setCellContents(cellAddress, cellValue + 1)
-      }
-    }
   }
 }
 
 function onCellInput(hfInstance, e){
   console.log('onCellInput')
-  return
   const {target, target: {dataset: {x, y, type}}} = e
   const table = target.closest('[data-sheet]')
   const isValidTarget = x&&y
   if (table&&isValidTarget) {
     const wrapper = table.parentNode
     const isAddingEditable = wrapper.classList.contains(className.addingEditable)
-    const isAddingHead = wrapper.classList.contains(className.addingHead)
     //
-    const isAdmin = wrapper.classList.contains(className.admin)
     const isEditable = target.classList.contains(className.editable)
     //
     const sheetName = table.dataset.sheet
     const cellPosition = getCellId(sheetName, x, y)
-    console.log('\t',cellPosition) // todo: remove log
     //
     const sheet = hfInstance.getSheetId(sheetName)
     //
@@ -276,21 +270,19 @@ function onCellInput(hfInstance, e){
     const row = parseInt(y,10)
     const cellAddress = {col, row, sheet}
     //
-    const cellValue = hfInstance.getCellValue(cellAddress)
     const cellFormula = hfInstance.getCellFormula(cellAddress)
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
     //
-    //dispatchEvent('cell', {col, row, cellValue, sheetName})
-    //
     if (x&&y&&type==='n'&&isEditable&&!isAddingEditable) {
       if (cellFormula===undefined&&canSetContents) {
-        hfInstance.setCellContents(cellAddress, cellValue + 1)
+        hfInstance.setCellContents(cellAddress, parseFloat(target.textContent))
       }
     }
   }
 }
 
 function onHyperFormulaValuesUpdated(hfInstance, parent, changed){
+  console.log('onHyperFormulaValuesUpdated',changed) // todo: remove log
   changed.forEach(change=>{
     const {address: {col, row, sheet}, newValue} = change
     const sheetName = hfInstance.getSheetName(sheet)
@@ -319,8 +311,12 @@ function getSpreadsheetName() {
   return 'spreadsheet'+(spreadsheetIndex++)
 }
 
-function getBase64(file) {
-  const reader = new FileReader()
-  reader.readAsDataURL(file)
-  reader.addEventListener('error', console.log.bind(console))
+/**
+ *
+ * @param {number} col
+ * @param {number} row
+ * @param {number} sheet
+ */
+function getCellAddress(col, row, sheet){
+  return {col, row, sheet}
 }

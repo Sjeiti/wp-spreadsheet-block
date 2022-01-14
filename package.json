@@ -7,9 +7,9 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "start": "run-p webpack:watch serve build:watch",
     "build": "wp-scripts build src/block/index.jsx --output-path=httpdocs/wp-content/plugins/spreadsheet-block/public/block --output-filename=index.js",
     "build:watch": "yarn build --watch",
-    "start": "run-p webpack:watch serve",
     "webpack": "npx webpack --config _webpack.config.js",
     "webpack:watch": "yarn webpack -w",
     "webpack:prod": "yarn webpack --mode production",

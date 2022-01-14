@@ -31,7 +31,8 @@
   }
   &.admin {
     &.adding-editable {
-      [data-type='n'] {
+      //[data-type='n'] {
+      [data-type='n']:not(.formula) {
         background: linear-gradient(135deg, #F8F888 0% 50%, transparent 50% 100%);
         background-size: 100% 100%;
         &.editable { background: #FF0; }
