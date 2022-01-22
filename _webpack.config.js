@@ -43,6 +43,16 @@ module.exports = env => {
           test: /\.scss$/
           ,use: ["style-loader", "css-loader", "sass-loader"]
         }
+        ,{
+          test: /\.(eot|woff|woff2|ttf|png|jp(e*)g|svg)$/
+          ,use: [{
+              loader: 'url-loader'
+              ,options: {
+                  limit: 8000 // Convert images < 8kb to base64 strings
+                  ,name: `img/[name]-[hash].[ext]`
+              }
+          }]
+        }
       ]
     }
     ,plugins: [

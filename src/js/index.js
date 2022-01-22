@@ -4,6 +4,9 @@ import {overwriteLog} from './utils/overwriteLog'
 import {nextFrame, createElement} from './utils'
 import '../scss/style.scss'
 import {cellToXY} from './utils/spreadsheet'
+import symbolDefs from '!!raw-loader!../assets/symbol-defs.svg'
+
+document.querySelector('#symbol-defs')||document.body.insertAdjacentHTML('afterbegin', symbolDefs)
 
 export const spreadsheetEvent = 'spreadsheetEvent'
 
@@ -159,7 +162,7 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
         createElement('label',label,{
           className: className.hideLabel
           ,for: hideName
-        })
+        }).innerHTML = svg('eye')+svg('eye-disabled')
       }
     }
     const table = createElement('table',fragment)
@@ -319,4 +322,11 @@ function getSpreadsheetName() {
  */
 function getCellAddress(col, row, sheet){
   return {col, row, sheet}
+}
+
+function svg(name){
+  return `<svg data-icon="${name}" class="icon icon-${name}">
+    <title>${name}</title>
+    <use xlink:href="#${name}"></use>
+  </svg>`
 }
