@@ -3,6 +3,8 @@
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
+  box-sizing: border-box;
+  *, *:before, *:after { box-sizing: inherit; }
   &:before {
     content: attr(data-spreadsheet-block);
     color: red;
@@ -10,6 +12,8 @@
     font-size: 12px;
     order: -2;
     flex: 0 0 100%;
+    max-width: 100%;
+    word-break: break-all;
   }
   .nav {
     width: 100%;
@@ -30,19 +34,28 @@
     }
   }
   &.admin {
+    table {
+      margin: 1rem 0;
+      box-shadow: rgba(0, 0, 0, 0.1) 0 0 4px;
+    }
+    //td, th { box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px; }
     &.adding-editable {
       //[data-type='n'] {
       [data-type='n']:not(.formula) {
-        background: linear-gradient(135deg, #F8F888 0% 50%, transparent 50% 100%);
-        background-size: 100% 100%;
-        &.editable { background: #FF0; }
+        box-shadow: #5c94bc 0 0 2px inset;
+        &.editable { box-shadow: #007CBA 0 0 0 2px inset }
       }
     }
-    .editable { background: #FF0; }
+    .editable {
+      //background: #FF0;
+      box-shadow: #007CBA 0 0 0 2px inset;
+      &:hover { box-shadow: #006BA1 0 0 0 2px inset; }
+    }
   }
   .icon {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    transform: translateY(- 0.25rem);
   }
   .hide-label {
     display: inline-block;
@@ -52,6 +65,7 @@
     background-size: 100%;
     background-position: 0 -0.375rem;
     vertical-align: middle;
+    .icon { display: block; }
     .icon-eye-disabled { display: none; }
   }
   :checked+.hide-label {

@@ -21,9 +21,9 @@ const ssb = 'ssb'
 const ALLOWED_MEDIA_TYPES = []
 
 const blockStyle = {
-    backgroundColor: 'white',
-    padding: '20px',
-    boxShadow: '0 0 0 1px solid inset'
+  backgroundColor: 'white',
+  padding: '20px',
+  boxShadow: '0 0 0 1px solid inset'
 }
 
 console.log('zucht',23) // todo: remove log

@@ -6,8 +6,6 @@ import '../scss/style.scss'
 import {cellToXY} from './utils/spreadsheet'
 import symbolDefs from '!!raw-loader!../assets/symbol-defs.svg'
 
-document.querySelector('#symbol-defs')||document.body.insertAdjacentHTML('afterbegin', symbolDefs)
-
 export const spreadsheetEvent = 'spreadsheetEvent'
 
 const className = {
@@ -49,6 +47,7 @@ export function init(){
       inputFile.value && inputFile.dispatchEvent(new Event('change'))
     }
   })
+  document.querySelector('#symbol-defs')||document.body.insertAdjacentHTML('afterbegin', symbolDefs)
 }
 
 function onInputFileChange(data, event){
