@@ -277,7 +277,9 @@ function onCellInput(hfInstance, e){
     //
     if (x&&y&&type==='n'&&isEditable&&!isAddingEditable) {
       if (cellFormula===undefined&&canSetContents) {
-        hfInstance.setCellContents(cellAddress, parseFloat(target.textContent))
+        const cellValue = parseFloat(target.textContent)
+        hfInstance.setCellContents(cellAddress, cellValue)
+        dispatchEvent('value', {col, row, cellValue, sheetName})
       }
     }
   }

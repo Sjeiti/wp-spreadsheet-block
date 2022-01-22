@@ -57,11 +57,15 @@ registerBlockType( 'spreadsheet/block', {
       head: {
         type: 'array',
         default: []
+      },
+      value: {
+        type: 'array',
+        default: []
       }
     },
 
     edit(props) {
-      const {setAttributes, attributes, attributes: {spreadsheetURI, hide, editable, head}} = props
+      const {setAttributes, attributes, attributes: {spreadsheetURI, hide, editable, head, value}} = props
 
       const blockProps = useBlockProps( { style: blockStyle } );
       blockProps.className += ' components-placeholder is-large  spreadsheet-wrapper'
@@ -106,6 +110,14 @@ registerBlockType( 'spreadsheet/block', {
           const cellId = getCellId(sheetName, col, row)
           isEditable&&setAttributes( { editable: toggleEntry(editable, cellId) } )
           isHead&&setAttributes( { head: toggleEntry(head, cellId) } )
+        } else {
+          // todo
+          // todo
+          // todo
+          // todo
+          // todo
+          // isEditable&&setAttributes( { value: toggleEntry(value, cellId, e.detail.cellValue) } )
+          console.log('onExternalEvent else', command, e.detail) // todo: remove log
         }
       }
 
