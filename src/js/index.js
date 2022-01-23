@@ -112,7 +112,7 @@ function getHyperFormulaInstance(spreadSheetData) {
 }
 
 function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
-  const {admin=false, hide=[], editable=[], head=[]} = data
+  const {admin=false, hide=[], editable=[], head=[], values={}} = data
   const createTextNode = document.createTextNode.bind(document)
   const fragment = document.createDocumentFragment()
   const spreadSheetName = getSpreadsheetName()
@@ -177,6 +177,14 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
         const cellId = getCellId(name, x, y)
         const isHead = head.includes(cellId)
         const isEditable = editable.includes(cellId)
+        const hasCustomValue = values.hasOwnProperty(cellId)
+        const cellValue = hasCustomValue?values[cellId]:value
+        if (hasCustomValue) {
+          // todo const cellAddress = {col:x, row:y, sheet:name}
+          // todo hfInstance.setCellContents(cellAddress, cellValue)
+          const cellAddress = {col:x, row:y, sheet:name}
+          hfInstance.setCellContents(cellAddress, cellValue)
+        }
         //
         const isFormula = x!==undefined&&y!==undefined&&(()=>{
           const cellAddress = getCellAddress(x, y, sheetIndex)
@@ -191,7 +199,7 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
         isEditable&&(params['contenteditable'] = 'true')
         const tableCellType = isHead&&'th'||'td'
         const tx = createElement(tableCellType,tr,params)
-        value&&tx.appendChild(createTextNode(value))
+        cellValue&&tx.appendChild(createTextNode(cellValue))
       }
     }
   })

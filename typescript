@@ -1,0 +1,13 @@
+Script started on 2022-01-23 10:54:35+01:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="53" LINES="21"]
+[?2004h[0;32m~/circularyarnlabel_csvplugin[0m [0;97m$[0m s[Kls
+[?2004lLICENSE             [0m[01;34mnode_modules[0m  typescript
+README.md           package.json  yarn.lock
+_webpack.config.js  [01;34msrc[0m
+[01;34mhttpdocs[0m            [01;34mtest[0m
+[?2004h[0;32m~/circularyarnlabel_csvplugin[0m [0;97m$[0m cinf[K[K[Konf
+[?2004lNo command conf found, did you mean:
+ Command dconf in package dconf from the x11-repo repository
+[?2004h[0;32m~/circularyarnlabel_csvplugin[0m [0;97m$[0m exit
+[?2004lexit
+
+Script done on 2022-01-23 10:55:09+01:00 [COMMAND_EXIT_CODE="127"]

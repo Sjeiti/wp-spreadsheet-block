@@ -1,9 +1,9 @@
 === Spreadsheet block ===
 Contributors: Sjeiti
 Tags: block, spreadsheet, csv, xls, xlsx
-Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
+Requires at least: 5
+Tested up to: 5.8
+Stable tag: 5.8
 License: MIT
 
 Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
@@ -16,9 +16,25 @@ For backwards compatibility, if this section is missing, the full length of the 
 Markdown parsed.
 
 
+= Usage =
+
+To use simply add a block to a page or post and choose 'Spreadsheet block'. Upload an xls or xlsx spreadsheet file from the sidebar.
+
 == Installation ==
 
-This section describes how to install the plugin and get it working.
+Either use Wordpress' built-in plugin installer.
+Or install manually; download and unzip (or clone) the plugin to the /wp-content/plugins/ directory. Then activate the plugin through the Plugins menu in WordPress.
+
+
+== Versioning and issues ==
+
+The main CVS repo for this plugin is on Github. The version up on Wordpress is a distilled build of the major tags.
+If you have any issues or suggestions please put them on [Github](https://github.com/Sjeiti/circularyarnlabel_csvplugin/issues).
+
+
+== Changelog ==
+= 1.0.1 =
+* initial release
 
 
 == Screenshots ==
