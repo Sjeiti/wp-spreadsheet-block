@@ -81,6 +81,11 @@ function loadedResultToSpreadsheetTable(target, buffer, data) {
   return hfInstance
 }
 
+/**
+ * Get spreadsheet data
+ * @param {WorkBook} workbook
+ * @return {[string, (*|Array)[]][]}
+ */
 function getSpreadsheetData(workbook) {
   return Object.entries(workbook.Sheets, {})
       .map(([sheetName, sheet])=>{
@@ -103,6 +108,11 @@ function getSpreadsheetData(workbook) {
       })
 }
 
+/**
+ * Get the hyperFormula instance
+ * @param {object} spreadSheetData
+ * @return {HyperFormula}
+ */
 function getHyperFormulaInstance(spreadSheetData) {
   const hfSheets = spreadSheetData.reduce((acc,[name,cols])=>{
     acc[name] = cols.map(rows=>rows.map(({formula,value})=>formula||value))
@@ -111,6 +121,13 @@ function getHyperFormulaInstance(spreadSheetData) {
   return HyperFormula.buildFromSheets(hfSheets, {licenseKey: 'gpl-v3'})
 }
 
+/**
+ * Create a document fragment for the spreadsheet table
+ * @param {HyperFormula} hfInstance
+ * @param {object} spreadSheetData
+ * @param {object} data
+ * @return {DocumentFragment}
+ */
 function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
   const {admin=false, hide=[], editable=[], head=[], values={}} = data
   const createTextNode = document.createTextNode.bind(document)
@@ -179,15 +196,10 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
         const isEditable = editable.includes(cellId)
         const hasCustomValue = values.hasOwnProperty(cellId)
         const cellValue = hasCustomValue?values[cellId]:value
-        if (hasCustomValue) {
-          // todo const cellAddress = {col:x, row:y, sheet:name}
-          // todo hfInstance.setCellContents(cellAddress, cellValue)
-          const cellAddress = {col:x, row:y, sheet:name}
-          hfInstance.setCellContents(cellAddress, cellValue)
-        }
+        const cellAddress = getCellAddress(x, y, sheetIndex)
+        hasCustomValue&&requestAnimationFrame(hfInstance.setCellContents.bind(hfInstance, cellAddress, cellValue))
         //
         const isFormula = x!==undefined&&y!==undefined&&(()=>{
-          const cellAddress = getCellAddress(x, y, sheetIndex)
           const cellFormula = hfInstance.getCellFormula(cellAddress)
           return cellFormula!==undefined
         })()
@@ -206,6 +218,11 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
   return fragment
 }
 
+/**
+ * Event handler for change on cell
+ * @param {HyperFormula} hfInstance
+ * @param {Event} e
+ */
 function onChangeOutput(hfInstance, e) {
   const {currentTarget, target: {name, checked}} = e
   const [spreadsheet, commandFromName, param] = name.split(/_/g)
@@ -219,6 +236,11 @@ function onChangeOutput(hfInstance, e) {
   }
 }
 
+/**
+ * Event handler for click on cell
+ * @param {HyperFormula} hfInstance
+ * @param {Event} e
+ */
 function onClickOutput(hfInstance, e) {
   const {target, target: {dataset: {x, y, type}}} = e
   const table = target.closest('[data-sheet]')
@@ -260,6 +282,11 @@ function onClickOutput(hfInstance, e) {
   }
 }
 
+/**
+ * Event handler for input on cell
+ * @param {HyperFormula} hfInstance
+ * @param {Event} e
+ */
 function onCellInput(hfInstance, e){
   console.log('onCellInput')
   const {target, target: {dataset: {x, y, type}}} = e
@@ -278,7 +305,7 @@ function onCellInput(hfInstance, e){
     //
     const col = parseInt(x,10)
     const row = parseInt(y,10)
-    const cellAddress = {col, row, sheet}
+    const cellAddress = getCellAddress(col, row, sheet)
     //
     const cellFormula = hfInstance.getCellFormula(cellAddress)
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
@@ -293,8 +320,13 @@ function onCellInput(hfInstance, e){
   }
 }
 
+/**
+ * Event handler for hyperFormula valuesUpdated event
+ * @param {HyperFormula} hfInstance
+ * @param {HTMLElement} parent
+ * @param {object[]} changed
+ */
 function onHyperFormulaValuesUpdated(hfInstance, parent, changed){
-  console.log('onHyperFormulaValuesUpdated',changed) // todo: remove log
   changed.forEach(change=>{
     const {address: {col, row, sheet}, newValue} = change
     const sheetName = hfInstance.getSheetName(sheet)
@@ -303,36 +335,71 @@ function onHyperFormulaValuesUpdated(hfInstance, parent, changed){
   })
 }
 
+/**
+ * Dispatch a custom event with custom data from documentElement
+ * @param {string} command
+ * @param {object} data
+ */
 function dispatchEvent(command, data){
   document.documentElement.dispatchEvent(new CustomEvent(spreadsheetEvent, {detail: {
       command, ...data
     }}))
 }
 
+/**
+ * Get the name for an input field
+ * @param {string} sheet
+ * @param {string[]} names
+ * @return {string}
+ */
 function getInputName(sheet,...names) {
   return sheet+'_'+names.join('_')
 }
 
-
+/**
+ * The cell ID string for use in data objects
+ * @param {string} sheetName
+ * @param {number} col
+ * @param {number} row
+ * @returns {string}
+ */
 export function getCellId(sheetName, col, row) {
   return `${sheetName}!${col}-${row}`
 }
 
 let spreadsheetIndex = 0
+
+/**
+ * Get the spreadsheet name by increasing an index
+ * @return {string}
+ */
 function getSpreadsheetName() {
   return 'spreadsheet'+(spreadsheetIndex++)
 }
 
 /**
- *
- * @param {number} col
- * @param {number} row
- * @param {number} sheet
+ * @typedef {Object} HyperFormulaAddress
+ * @property {number} col
+ * @property {number} row
+ * @property {number} sheet
  */
-function getCellAddress(col, row, sheet){
-  return {col, row, sheet}
+
+/**
+ * Get the cell address object for use with the HyperFormula instance
+ * @param {number} colIndex
+ * @param {number} rowIndex
+ * @param {number} sheetIndex
+ * @returns {HyperFormulaAddress}
+ */
+function getCellAddress(colIndex,rowIndex,sheetIndex){
+  return {col: colIndex, row: rowIndex, sheet: sheetIndex}
 }
 
+/**
+ * Generate an SVG <use> HTML string
+ * @param {string} name
+ * @returns {string}
+ */
 function svg(name){
   return `<svg data-icon="${name}" class="icon icon-${name}">
     <title>${name}</title>
