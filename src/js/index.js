@@ -30,10 +30,13 @@ nextFrame(init, 3)
 
 export function init(){
   Array.from(document.querySelectorAll('[data-spreadsheet-block]')).forEach(element=>{
+    const isLocalhost = location.hostname==='localhost'
     const isTest = element.matches('[data-test]')
     const {spreadsheetBlock} = element.dataset
     const data = spreadsheetBlock&&JSON.parse(spreadsheetBlock)||{}
+    console.log('data',data) // todo: remove log
     const {admin} = data
+    isLocalhost&&element.classList.add('localhost')
     admin&&element.classList.add(className.admin)
     if (!isTest) {
       fetch(data.spreadsheetURI)
@@ -41,7 +44,7 @@ export function init(){
         .then(buffer=>loadedResultToSpreadsheetTable(element, buffer, data))
         .catch(console.error.bind(console))
     } else {
-      location.hostname==='localhost'&&overwriteLog()
+      isLocalhost&&overwriteLog()
       const inputFile = document.getElementById('file')
       inputFile.addEventListener('change', onInputFileChange.bind(null, data))
       inputFile.value && inputFile.dispatchEvent(new Event('change'))
@@ -192,6 +195,7 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
         const cell = row[j]
         const {x, y, type, formula, value} = cell||{}
         const cellId = getCellId(name, x, y)
+        console.log('cellId',cellId,name,x,y) // todo: remove log
         const isHead = head.includes(cellId)
         const isEditable = editable.includes(cellId)
         const hasCustomValue = values.hasOwnProperty(cellId)

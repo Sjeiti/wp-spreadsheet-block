@@ -6,7 +6,7 @@ import {
   MediaUpload,
   MediaUploadCheck
 } from '@wordpress/block-editor'
-import { PanelBody,   Button, TextControl } from '@wordpress/components'
+import { PanelBody, Button } from '@wordpress/components'
 import { Fragment } from '@wordpress/element'
 import { __ } from '@wordpress/i18n'
 
@@ -25,8 +25,6 @@ const blockStyle = {
   padding: '20px',
   boxShadow: '0 0 0 1px solid inset'
 }
-
-console.log('zucht',23) // todo: remove log
 
 function view(attr, admin) {
   return <div
@@ -70,7 +68,6 @@ registerBlockType( 'spreadsheet/block', {
       const blockProps = useBlockProps( { style: blockStyle } );
       blockProps.className += ' components-placeholder is-large  spreadsheet-wrapper'
 
-
       const [isEditable, setEditable] = useState(false)
       const [isHead, setHead] = useState(false)
       const onSelectMedia = (media) => {
@@ -81,21 +78,13 @@ registerBlockType( 'spreadsheet/block', {
         })
       }
 
-      const onClickAdmin = (e) => {
-        console.log('onClickAdmin', e) // todo: remove log
-        // const {target, currentTarget} = e.nativeEvent
-        // const checkboxes = Array.from(target.querySelector('[type=checkbox]'))
-        // checkboxes.forEach(input=>{
-        //   const {name, checked} = input
-        //   const [spreadsheet, command, value] = name.split(/_/g)
-        //   console.log('name', name, checked, command, value) // todo: remove log
-        // })
-        // setAttributes( { foo: Math.random().toString() } )
-      }
-
       const onExternalEvent = (e)=>{
         const {command, ...data} = e.detail
         console.log('onExternalEvent', e.detail) // todo: remove log
+        const getCellIdFromData = data=>{
+          const {col, row, sheetName} = data
+          return getCellId(sheetName, col, row)
+        }
         if (command==='hide') {
           const {param, checked} = data
           setAttributes( { hide: toggleEntry(hide, param, checked) } )
@@ -106,23 +95,14 @@ registerBlockType( 'spreadsheet/block', {
           const {checked} = data
           setHead(checked)
         } else if (command==='cell') {
-          const {col, row, sheetName} = data
-          const cellId = getCellId(sheetName, col, row)
+          const cellId = getCellIdFromData(data)
           isEditable&&setAttributes( { editable: toggleEntry(editable, cellId) } )
           isHead&&setAttributes( { head: toggleEntry(head, cellId) } )
-        } else {
-          // todo
-          // todo
-          // todo
-          // isEditable&&setAttributes( { value: toggleEntry(value, cellId, e.detail.cellValue) } )
-          //
+        } else if (command==='value') {
+          const cellId = getCellIdFromData(data)
           setAttributes( { values: {...values, ...{[cellId]: e.detail.cellValue}} } )
-          //
-          console.log('onExternalEvent else', command, e.detail) // todo: remove log
-          //
-          // todo
-          // todo
-          // todo
+        } else {
+          console.log('onExternalEvent unknown command') // todo: remove log
         }
       }
 
@@ -134,11 +114,7 @@ registerBlockType( 'spreadsheet/block', {
       useEffect(()=>{
         document.documentElement.addEventListener(spreadsheetEvent, onExternalEvent)
         return ()=>document.documentElement.removeEventListener(spreadsheetEvent, onExternalEvent)
-      }, [setAttributes, isEditable, isHead, editable, head])
-
-      // useEffect(()=>{
-      //   document.documentElement.addEventListener('what',console.log.bind(console,'eeeh'))
-      // }, [])
+      }, [setAttributes, isEditable, isHead, editable, head, values])
 
       return (<Fragment>
             <InspectorControls>
@@ -149,7 +125,6 @@ registerBlockType( 'spreadsheet/block', {
                 <MediaUploadCheck>
                   <MediaUpload
                       onSelect={ onSelectMedia }
-                      // onSelect={ console.log.bind(console, 'selected') }
                       allowedTypes={ ALLOWED_MEDIA_TYPES }
                       render={({open}) => (<Fragment><Button onClick={open}>
                         {__('Choose a spreadsheet',ssb)}
@@ -158,15 +133,11 @@ registerBlockType( 'spreadsheet/block', {
                 </MediaUploadCheck>
               </PanelBody>
             </InspectorControls>
-            <div {...blockProps} onClick={onClickAdmin}>
-              {view(attributes, true)}
-            </div>
+            <div {...blockProps}>{view(attributes, true)}</div>
           </Fragment>)
     },
     save(props) {
-        const {attributes, attributes: {spreadsheetURI, hide/*, linkLabel, foo*/}} = props
-        const blockProps = useBlockProps.save( { style: blockStyle } )
-        console.log('save',props.attributes) // todo: remove log
-        return view(attributes)
+        useBlockProps.save( { style: blockStyle } )
+        return view(props.attributes)
     }
-} )
+})
