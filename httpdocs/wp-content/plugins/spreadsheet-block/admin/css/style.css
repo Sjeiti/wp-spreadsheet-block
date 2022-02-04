@@ -106,7 +106,7 @@
   box-shadow: 0 0 0 1px black inset;
 }
 
-[data-spreadsheet-block]:before {
+[data-spreadsheet-block].localhost:before {
   content: attr(data-spreadsheet-block);
   color: gray;
   display: block;

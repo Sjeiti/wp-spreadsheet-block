@@ -28,6 +28,9 @@ const cellOptions = [command.editable, command.head]
 
 nextFrame(init, 3)
 
+/**
+ * Initialise all [data-spreadsheet-block] elements
+ */
 export function init(){
   Array.from(document.querySelectorAll('[data-spreadsheet-block]')).forEach(element=>{
     const isLocalhost = location.hostname==='localhost'
@@ -53,6 +56,11 @@ export function init(){
   document.querySelector('#symbol-defs')||document.body.insertAdjacentHTML('afterbegin', symbolDefs)
 }
 
+/**
+ * Input file element change handler
+ * @param {object} data
+ * @param {Event} event
+ */
 function onInputFileChange(data, event){
   const [file] = event.target.files
   const reader = new FileReader()
@@ -60,12 +68,24 @@ function onInputFileChange(data, event){
   reader.readAsBinaryString(file)
 }
 
+/**
+ * FileReader load event handler
+ * @param {object} data
+ * @param {Event} e
+ */
 function onFileReaderLoad(data, e) {
   const output = document.querySelector('[data-spreadsheet-block]')
   const {result} = e.target
   loadedResultToSpreadsheetTable(output, result, data)
 }
 
+/**
+ * Convert loaded file buffer to WorkBook and HyperFormula data
+ * @param {FileReader} target
+ * @param {Buffer} buffer
+ * @param {object} data
+ * @return {HyperFormula}
+ */
 function loadedResultToSpreadsheetTable(target, buffer, data) {
   const workbook = XLSX.read(buffer, {type: 'binary', bookDeps: true})
   console.log('workbook',workbook) // todo: remove log
@@ -195,7 +215,6 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
         const cell = row[j]
         const {x, y, type, formula, value} = cell||{}
         const cellId = getCellId(name, x, y)
-        console.log('cellId',cellId,name,x,y) // todo: remove log
         const isHead = head.includes(cellId)
         const isEditable = editable.includes(cellId)
         const hasCustomValue = values.hasOwnProperty(cellId)
@@ -314,9 +333,12 @@ function onCellInput(hfInstance, e){
     const cellFormula = hfInstance.getCellFormula(cellAddress)
     const canSetContents = hfInstance.isItPossibleToSetCellContents(cellAddress)
     //
-    if (x&&y&&type==='n'&&isEditable&&!isAddingEditable) {
+    const isTypeNumber = type==='n'
+    const isTypeString = type==='s'
+    if (x&&y&&(isTypeNumber||isTypeString)&&isEditable&&!isAddingEditable) {
       if (cellFormula===undefined&&canSetContents) {
-        const cellValue = parseFloat(target.textContent)
+        const {textContent} = target
+        const cellValue = isTypeNumber?parseFloat(textContent):textContent
         hfInstance.setCellContents(cellAddress, cellValue)
         dispatchEvent('value', {col, row, cellValue, sheetName})
       }
@@ -335,7 +357,7 @@ function onHyperFormulaValuesUpdated(hfInstance, parent, changed){
     const {address: {col, row, sheet}, newValue} = change
     const sheetName = hfInstance.getSheetName(sheet)
     const cellElment = parent.querySelector(`[data-sheet="${sheetName}"] [data-x="${col}"][data-y="${row}"]`)
-    cellElment.textContent = newValue
+    if (cellElment.textContent!==newValue) cellElment.textContent = newValue
   })
 }
 
