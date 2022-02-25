@@ -1,6 +1,6 @@
 {
   "name": "wordpress_spreadsheet_block_plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "repository": "git@github.com:Sjeiti/circularyarnlabel_csvplugin.git",
   "author": "Ron Valstar <ron@ronvalstar.nl>",
