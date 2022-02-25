@@ -1,2 +1,2 @@
-# circularyarnlabel_csvplugin
+# Wordpress spreadsheet block plugin
 

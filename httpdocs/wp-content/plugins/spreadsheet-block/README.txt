@@ -2,8 +2,8 @@
 Contributors: Sjeiti
 Tags: block, spreadsheet, csv, xls, xlsx
 Requires at least: 5
-Tested up to: 5.8
-Stable tag: 5.8
+Tested up to: 5.9.1
+Stable tag: 1.0.1
 License: MIT
 
 Allows you to use uploaded xlsx files as blocks.

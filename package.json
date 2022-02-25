@@ -2,7 +2,7 @@
   "name": "wordpress_spreadsheet_block_plugin",
   "version": "1.0.1",
   "main": "index.js",
-  "repository": "git@github.com:Sjeiti/circularyarnlabel_csvplugin.git",
+  "repository": "git@github.com:Sjeiti/wp-spreadsheet-block.git",
   "author": "Ron Valstar <ron@ronvalstar.nl>",
   "license": "MIT",
   "private": false,
@@ -15,7 +15,8 @@
     "webpack:prod": "yarn webpack --mode production",
     "serve": "npx webpack serve --config _webpack.config.js",
     "css": "sass src/scss/admin.scss httpdocs/wp-content/plugins/spreadsheet-block/admin/css/style.css",
-    "css:watch": "yarn css -w"
+    "css:watch": "yarn css -w",
+    "distribute": "node task/distribute.js"
   },
   "dependencies": {
     "@wordpress/block-editor": "^8.0.7",
