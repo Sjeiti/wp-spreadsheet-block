@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <style type="text/css">
+    table {
+      position: relative;
+      margin: 2rem;
+      width: 128px;
+      height: 128px;
+      border: 1px solid black;
+      font-size: 8px;
+      line-height: 100%;
+      text-align: center;
+      font-family: 'Work Sans', sans-serif;
+      color: #888;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+    }
+    
+    thead th:nth-child(4n-1) { background-color: #AAA; }
+    thead th:nth-child(4n-2) { background-color: #BBB; }
+    thead th:nth-child(4n-3) { background-color: #AAA; }
+    thead th:nth-child(4n-4) { background-color: #CCC; }
+    
+    tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.05); }
+    tbody td:nth-child(even) { background-color: rgba(0,0,0,0.05); }
+    
+    table:nth-child(1) {
+      width: 772px;
+      height: 250px;
+    }
+    
+    th { font-weight: 600; }
+    
+    table:nth-child(1) th:first-child:before {
+      content: 'Spreadsheet block';
+      position: absolute;
+      left: -14px;
+      bottom: -13px;
+      font-size: 78px;
+      line-height: 100%;
+      color: #666;
+      font-weight: 300;
+      word-spacing: 20px;
+    }
+    table th:first-child:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #bce883;
+      /*background-color: #6aa3bf;*/
+      /*box-shadow: 196px 64px 256px #a4dc5b inset;*/
+      mix-blend-mode: multiply;
+    }
+  </style>
+</head>
+<body>
+<script>
+  
+  const iconSize = 8
+  const bannerSizeX = 24
+  const bannerSizeY = 16
+
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+  const numbers = '0123456789'.split('')
+
+  const char = (i)=>alphabet[i%alphabet.length]
+  const num = (i)=>numbers[i%numbers.length]
+  
+  document.body.innerHTML = `
+
+  <table cellpadding=0 cellspacing=0>
+  <thead><tr>${'<th></th>'.repeat(bannerSizeX)}</tr><thead>
+  <tbody>
+  ${`<tr>${'<td></td>'.repeat(bannerSizeX)}</tr>`.repeat(bannerSizeY-1)}
+  <tbody>
+  </table>
+
+  <table cellpadding=0 cellspacing=0>
+  <thead><tr>${'<th></th>'.repeat(iconSize/2)}</tr><thead>
+  <tbody>
+  ${`<tr>${'<td></td>'.repeat(iconSize/2)}</tr>`.repeat(iconSize-1)}
+  <tbody>
+  </table>
+`
+  
+  Array.from(document.querySelectorAll('th')).forEach((m,i)=>m.textContent=char(i))
+  Array.from(document.querySelectorAll('td')).forEach((m,i)=>m.textContent=num(i))
+  Array.from(document.querySelectorAll('td')).forEach((m,i)=>m.textContent=Math.floor(1E3*Math.random()))
+</script>
+</body>
+</html>
