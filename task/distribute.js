@@ -13,7 +13,7 @@ const {
 
 const filePackage = 'package.json'
 const folderPluginBuild = 'httpdocs/wp-content/plugins/spreadsheet-block'
-const folderPluginTarget = 'temp/test'
+const folderPluginTarget = 'temp/test/spreadsheet-block'
 const fileReadmeTxt = resolve(folderPluginBuild, 'README.txt')
 
 ;(async function(){
