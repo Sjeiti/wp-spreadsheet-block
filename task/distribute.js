@@ -15,6 +15,7 @@ const filePackage = 'package.json'
 const folderPluginBuild = 'httpdocs/wp-content/plugins/spreadsheet-block'
 const folderPluginTarget = 'temp/test/spreadsheet-block'
 const fileReadmeTxt = resolve(folderPluginBuild, 'README.txt')
+const filePHP = resolve(folderPluginBuild, 'spreadsheet-block.php')
 
 ;(async function(){
   const packageJsonContents = await readFile(filePackage)
@@ -23,9 +24,13 @@ const fileReadmeTxt = resolve(folderPluginBuild, 'README.txt')
 
   console.info('Distributing',packageJson.name,version)
 
-  const readmeTxtContents = await readFile(fileReadmeTxt)
-  const newReadmeTxtContents = readmeTxtContents.toString().replace(/(Stable\stag:\s)(\d+\.\d+\.\d+)/, '$1'+version)
-  writeFile(fileReadmeTxt, newReadmeTxtContents).then(()=>console.info(fileReadmeTxt+' written'))
+  ;[filePHP,fileReadmeTxt].forEach(async file=>{
+    const contents = await readFile(file)
+    const newContents = contents.toString()
+      .replace(/(Stable\stag:\s)(\d+\.\d+\.\d+)/, '$1'+version)
+      .replace(/(\s\*\sVersion:\s+)(\d+\.\d+\.\d+)/, '$1'+version)
+    writeFile(file, newContents).then(()=>console.info(file+' written'))
+  })
 
   await copyDir(folderPluginBuild, folderPluginTarget)
 })()
