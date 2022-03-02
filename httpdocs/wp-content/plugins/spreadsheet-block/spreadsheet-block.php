@@ -1,10 +1,6 @@
 <?php
 
 /**
- * @link              https://ronvalstar.nl
- * @since             1.0.0
- * @package           Spreadsheet_Block
- *
  * @wordpress-plugin
  * Plugin Name:       Spreadsheet block
  * Plugin URI:        https://github.com/Sjeiti/wp-spreadsheet-block
