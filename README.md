@@ -22,10 +22,7 @@ The vanilla version will run on [localhost:9000](http://localhost:9000/)
 
 The main dependencies are two spreadsheet parsers: `xlsx` and `hyperformula`. The former parses the spreadsheet binary, the latter is responsible for recalculating formula values.
 
-Initialisation of a spreadheet component is done by checking for parent elements matching `[data-spreadsheet-block]`. The attribute value should be a JSON configuration with the following interface:
-
-admin
-spreadsheetURI
+Initialisation of a spreadheet component is done by checking for parent elements matching `[data-spreadsheet-block]`. The attribute value should be a JSON configuration of the type `SpreadsheetData` (see type definition in source).
 
 ### Deployment
 

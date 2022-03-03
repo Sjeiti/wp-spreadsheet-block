@@ -29,6 +29,16 @@ const cellOptions = [command.editable, command.head]
 nextFrame(init, 3)
 
 /**
+ * @typedef {object} SpreadsheetData
+ * @param {boolean} admin - Admin/debug interface
+ * @param {string} spreadsheetURI - URI to load the spreadsheet from
+ * @param {string[]} hide - Sheet names to hide from view
+ * @param {string[]} editable - Editable cells
+ * @param {string[]} head - Cells rendered as TableHeadElement
+ * @param {object} values - Specific cell values
+ */
+
+/**
  * Initialise all [data-spreadsheet-block] elements
  */
 export function init(){
@@ -58,7 +68,7 @@ export function init(){
 
 /**
  * Input file element change handler
- * @param {object} data
+ * @param {SpreadsheetData} data
  * @param {Event} event
  */
 function onInputFileChange(data, event){
@@ -70,7 +80,7 @@ function onInputFileChange(data, event){
 
 /**
  * FileReader load event handler
- * @param {object} data
+ * @param {SpreadsheetData} data
  * @param {Event} e
  */
 function onFileReaderLoad(data, e) {
@@ -83,7 +93,7 @@ function onFileReaderLoad(data, e) {
  * Convert loaded file buffer to WorkBook and HyperFormula data
  * @param {FileReader} target
  * @param {Buffer} buffer
- * @param {object} data
+ * @param {SpreadsheetData} data
  * @return {HyperFormula}
  */
 function loadedResultToSpreadsheetTable(target, buffer, data) {
@@ -148,7 +158,7 @@ function getHyperFormulaInstance(spreadSheetData) {
  * Create a document fragment for the spreadsheet table
  * @param {HyperFormula} hfInstance
  * @param {object} spreadSheetData
- * @param {object} data
+ * @param {SpreadsheetData} data
  * @return {DocumentFragment}
  */
 function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
