@@ -1,4 +1,6 @@
+const { program } = require('commander')
 const {resolve, join} = require('path')
+
 const {
   existsSync,
   promises: {
@@ -10,10 +12,14 @@ const {
   }
 } = require('fs')
 
+const {tag} = program
+  .option('-t, --tag')
+  .parse()
+  .opts()
 
 const filePackage = 'package.json'
 const folderPluginBuild = 'httpdocs/wp-content/plugins/spreadsheet-block'
-const folderPluginTarget = 'temp/test/spreadsheet-block'
+const folderPluginTarget = 'wordpress-svn/trunk'
 const fileReadmeTxt = resolve(folderPluginBuild, 'README.txt')
 const filePHP = resolve(folderPluginBuild, 'spreadsheet-block.php')
 
@@ -21,18 +27,19 @@ const filePHP = resolve(folderPluginBuild, 'spreadsheet-block.php')
   const packageJsonContents = await readFile(filePackage)
   const packageJson = JSON.parse(packageJsonContents)
   const version = packageJson.version
+  const folderPluginTagTarget = 'wordpress-svn/tags/'+version
 
   console.info('Distributing',packageJson.name,version)
 
-  ;[filePHP,fileReadmeTxt].forEach(async file=>{
+  await Promise.all([filePHP,fileReadmeTxt].map(async file=>{
     const contents = await readFile(file)
     const newContents = contents.toString()
       .replace(/(Stable\stag:\s)(\d+\.\d+\.\d+)/, '$1'+version)
       .replace(/(\s\*\sVersion:\s+)(\d+\.\d+\.\d+)/, '$1'+version)
-    writeFile(file, newContents).then(()=>console.info(file+' written'))
-  })
+    return writeFile(file, newContents).then(()=>console.info(' -', file.split(/[\\\/]/g).pop(), 'written'))
+  }))
 
-  await copyDir(folderPluginBuild, folderPluginTarget)
+  await copyDir(folderPluginBuild, tag?folderPluginTagTarget:folderPluginTarget)
 })()
 
 async function copyDir(src,dest) {

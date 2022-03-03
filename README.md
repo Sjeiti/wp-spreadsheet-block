@@ -27,3 +27,7 @@ Initialisation of a spreadheet component is done by checking for parent elements
 admin
 spreadsheetURI
 
+### Deployment
+
+Wordpress still uses SVN for their plugin directory. For deployment to that directory some helper scripts are created. With `yarn distribute` you copy the current state of the plugin to `trunk`. With `yarn distribute --tag` you copy the current version to `tag`. Note that keeping SVN trunk and tags up to date with GIT tags is a manual process.
+

@@ -5,6 +5,8 @@ httpdocs/wp-content/*
 httpdocs/wp-content/plugins/*
 !httpdocs/wp-content/plugins/spreadsheet-block/
 
+wordpress-svn/
+
 node_modules/
 
 *.log
