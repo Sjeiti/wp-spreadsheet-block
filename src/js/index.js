@@ -237,7 +237,7 @@ function getSpreadsheetFragment(hfInstance, spreadSheetData, data) {
           return cellFormula!==undefined
         })()
         //
-        const classNames = `x${x} y${y}`
+        const classNames = `x${x||j} y${y||i}`
             +(isEditable?' '+className.editable:'')
             +(isFormula?' '+className.formula:'')
         const params = cell?Object.entries({x,y,type}).reduce((acc,[name,value])=>(acc['data-'+name]=value,acc),{className:classNames}):{className:classNames}
