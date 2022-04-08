@@ -3,7 +3,7 @@ Contributors: Sjeiti
 Tags: block, spreadsheet, csv, xls, xlsx
 Requires at least: 5
 Tested up to: 5.9.1
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: MIT
 
 Allows you to use uploaded xlsx files as blocks.
@@ -40,3 +40,5 @@ If you have any issues or suggestions please put them on [Github](https://github
 == Changelog ==
 = 1.0.2 =
 * initial release
+= 1.0.3 =
+* fixed empty cell classNames

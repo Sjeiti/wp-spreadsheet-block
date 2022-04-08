@@ -5,7 +5,7 @@
  * Plugin Name:       Spreadsheet block
  * Plugin URI:        https://github.com/Sjeiti/wp-spreadsheet-block
  * Description:       Display interactive spreadsheets
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            Ron Valstar
  * Author URI:        https://ronvalstar.nl
  * License:           MIT
